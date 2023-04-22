@@ -17,7 +17,7 @@ parameters = {'GRID_SIZE' : 10,
               'POPULATION' : 1,
               'TICKS':3}
 
-
+#test
 
 
 #### Useful functions ####
