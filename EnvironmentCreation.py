@@ -6,15 +6,17 @@ Created on Mon Apr 10 16:54:25 2023
 @author: kieran
 """
 import os
-os.chdir('/Users/kieran/Documents/Simulator')
+os.chdir('/Users/kieran/Documents/Symulator')
 
 import pandas as pd
 import random
+import math
+import matplotlib.pyplot as plt
 
 #### Parameter declarations ####
 
-parameters = {'GRID_SIZE' : 10,
-              'POPULATION' : 1,
+parameters = {'GRID_SIZE' : 128,
+              'POPULATION' : 100,
               'TICKS':3}
 
 #test
@@ -47,17 +49,29 @@ def Num2Coord(num, axis):
     
     return(Coord)
 
-def UpdatePopulation(df, functions_list):
+
     
-    for c in df.keys():
-        
-        df['Coordinates'] = MoveRandom(df['Coordinates'], field, parameters['GRID_SIZE'])
+    
         
         
 def UpdateField():
     pass
 
+#### Inputs: These are the things that creatures can sense ####
 
+# Calculated age based on tick
+def Age(tick,total_ticks):
+    
+    Age = (tick/total_ticks)
+    
+    return(Age)
+
+# Generate an oscillating sin wave based on tick
+def Oscillator(tick):
+    
+    y = (math.sin(tick/10) + 1)/2
+    
+    return(y)
 
 
 #### Outputs: These are the Actions that Each Creature can take ####
@@ -239,10 +253,34 @@ population, field = Populate(field,
                       parameters['GRID_SIZE'],
                       parameters['POPULATION'])
 
+actions = [MoveRandom]
 
-#for t in range(parameters['TICKS']) 
+def MainLoop():
+    
+    for t in range(parameters['TICKS']):
+        
+        for c in population.keys():
+            
+            # Isolate the current coordinate
+            Coords = population[c]['Coordinates']
+            
+            # Generate the new Coordinates
+            New_Coords = random.choice(actions)(Coords,field,parameters['GRID_SIZE'])
+            
+            # Update the Populations data
+            population[c]['Coordinates'] = New_Coords
+            
+            # Update the Fields
+            y = Coords[1]
+            x = Coords[0]
+            
+            N_y = New_Coords[1]
+            N_x = New_Coords[0]
+            
+            field[y][x] = '.'
+            field[N_y][N_x] = 'c'
+        
+        filename = ('Outputs/' + str(t) + '_field.csv')
+        getArray(field).to_csv(filename)
 
-
-
-
-getArray(field).to_csv('field.csv')
+MainLoop()
