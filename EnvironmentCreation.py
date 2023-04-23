@@ -85,7 +85,7 @@ def Osc(tick,pop_dict,cr_id):
     
     return(y)
 
-def TotalPopulation(pop_dict):
+def TPo(pop_dict):
     
     # Current population
     curr_pop = len(pop_dict.keys())
@@ -94,7 +94,7 @@ def TotalPopulation(pop_dict):
     
     return(output)
 
-def LocalPopulation(pop_dict,cr_id,grid):
+def LPo(pop_dict,cr_id,grid):
     
     # Isolate the coordinates of the individual
     Coords = pop_dict[cr_id]['Coordinates']
@@ -457,7 +457,71 @@ def SOsc(cr_id,change):
 
 
     
+def GenomeGenerate():
+    
+    dictionary = {}
+    
+    
+    input_neurons = ['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE',
+                     'BlW','BlS','BlN']
+    
+    internal_neurons  = list(range(parameters['INTERNAL_NEURONS']))
+    
+    output_neurons = ['MvN','MvE','MvS','MvW','MvR','SOsc']
+    
+    type_list = [0,1]
+    
+    for p in population.keys():
+        
+        entry = {}
+        
+        for g in range(parameters['GENES']):
+            
+            source = random.choice(type_list)
+            sink = random.choice(type_list)
+            
+            if source == 0 and sink == 0:
+                
+                entry[g] = {'source_type':0,
+                            'source':random.choice(input_neurons),
+                            'sink_type':0,
+                            'sink':random.choice(internal_neurons),
+                            'weight':random.uniform(-4, 4)}
+                
+            elif source == 0 and sink == 1:
+                
+                entry[g] = {'source_type':0,
+                            'source':random.choice(input_neurons),
+                            'sink_type':1,
+                            'sink':random.choice(output_neurons),
+                            'weight':random.uniform(-4, 4)}
+                
+            elif source == 1 and sink == 0:
+                
+                entry[g] = {'source_type':1,
+                            'source':random.choice(internal_neurons),
+                            'sink_type':0,
+                            'sink':random.choice(internal_neurons),
+                            'weight':random.uniform(-4, 4)}
+            
+            elif source == 1 and sink == 1:
+                
+                entry[g] = {'source_type':1,
+                            'source':random.choice(internal_neurons),
+                            'sink_type':1,
+                            'sink':random.choice(output_neurons),
+                            'weight':random.uniform(-4, 4)}
+            
+        dictionary[p] = entry
+        
+    return(dictionary)
+    
+    
 
+    
+
+    
+    
 
 #### Environment creation ####
 
@@ -567,7 +631,7 @@ def MainLoop():
 MainLoop()
 
 
-
+test = GenomeGenerate()
 
 
 
