@@ -1,17 +1,13 @@
-setwd('~/Documents/Symulator/Outsputs')
+setwd('~/Documents/Symulator/Outputs')
 
 library('ggplot2')
 
 basic_plotter <- function(filename) {
   
-  
-  
   # Import the field
   grid <- read.csv(filename)
   rownames(grid) <- grid$X
   grid <- as.data.frame(subset(grid,select=-c(X)))
-  
-  
   
   grid <- as.matrix(grid)
   
@@ -30,7 +26,6 @@ basic_plotter <- function(filename) {
   
   
 }
-
 
 print(basic_plotter('0_field.csv'))
 print(basic_plotter('1_field.csv'))
