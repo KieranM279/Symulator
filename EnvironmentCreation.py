@@ -20,7 +20,16 @@ parameters = {'GRID_SIZE' : 128,
               'TICKS':3,
               
               'INTERNAL_NEURONS':3,
-              'GENES':16}
+              'GENES':4}
+
+
+#### Neurone dictionary ####
+
+
+neurones = {
+    'input':{'Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN'},
+    'output':{'MvN','MvE','MvS','MvW','MvR','SOsc'}
+    }
 
 
 
@@ -486,7 +495,7 @@ def GenomeGenerate():
                             'source':random.choice(input_neurons),
                             'sink_type':0,
                             'sink':random.choice(internal_neurons),
-                            'weight':random.uniform(-4, 4)}
+                            'weight':round(random.uniform(-4, 4),5)}
                 
             elif source == 0 and sink == 1:
                 
@@ -494,7 +503,7 @@ def GenomeGenerate():
                             'source':random.choice(input_neurons),
                             'sink_type':1,
                             'sink':random.choice(output_neurons),
-                            'weight':random.uniform(-4, 4)}
+                            'weight':round(random.uniform(-4, 4),5)}
                 
             elif source == 1 and sink == 0:
                 
@@ -502,7 +511,7 @@ def GenomeGenerate():
                             'source':random.choice(internal_neurons),
                             'sink_type':0,
                             'sink':random.choice(internal_neurons),
-                            'weight':random.uniform(-4, 4)}
+                            'weight':round(random.uniform(-4, 4),5)}
             
             elif source == 1 and sink == 1:
                 
@@ -510,14 +519,32 @@ def GenomeGenerate():
                             'source':random.choice(internal_neurons),
                             'sink_type':1,
                             'sink':random.choice(output_neurons),
-                            'weight':random.uniform(-4, 4)}
+                            'weight':round(random.uniform(-4, 4),5)}
             
         dictionary[p] = entry
         
     return(dictionary)
     
     
-
+def GenomePrinter(cr_id,df):
+    
+    df = df[cr_id]
+    
+    genome = list()
+    
+    for g in df.keys():
+        
+        gene_list = list()
+        for codo in df[g].values():
+            gene_list.append(str(codo))
+        
+        gene = '|'.join(gene_list)
+        
+        genome.append(gene)
+    
+    genome = '\t'.join(genome)
+    
+    print(genome)
     
 
     
@@ -633,5 +660,5 @@ MainLoop()
 
 test = GenomeGenerate()
 
-
+GenomePrinter('creature_0', test)
 
