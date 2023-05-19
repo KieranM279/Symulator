@@ -5,7 +5,7 @@ Created on Thu May 18 18:59:09 2023
 
 @author: kieran
 """
-
+import math
 
 def rev(x):
     
@@ -54,17 +54,85 @@ def DecBin(x):
     
     while(x>0):
         
+        # If the number odd
         if x%2 ==1:
             
             x = (x/2)-0.5
             output = output + '1'
         
         else:
-        
+        # If the number is even
             x = x/2
             output = output + '0'
 
     return(rev(output))
 
+
+def BinHex(x):
+    
+    # Define the conversion dictionary
+    dictionary = {
+        '0000':'0',
+        '0001':'1',
+        '0010':'2',
+        '0011':'3',
+        '0100':'4',
+        '0101':'5',
+        '0110':'6',
+        '0111':'7',
+        '1000':'8',
+        '1001':'9',
+        '1010':'A',
+        '1011':'B',
+        '1100':'C',
+        '1101':'D',
+        '1110':'E',
+        '1111':'F'
+        }
+    
+    # Initialise some temporary variables
+    four_bit_list = list()
+    four_bit = ''
+    
+    # Loop through the characters in the string
+    for i in range(len(x)):
+        
+        # Add each character into the four bits
+        four_bit = (four_bit + x[-i-1])
+        
+        # When four bits are together add to a list
+        if len(four_bit) == 4:
+            
+            four_bit_list.append(rev(four_bit))
+            four_bit = ''
+        
+        # Then add the remainder
+        if i == (len(x)-1):
+            
+            four_bit_list.append(rev(four_bit))
+    
+    # Reverse the list
+    four_bit_list = rev(four_bit_list)
+    
+    # Remove my mistakes
+    if four_bit_list[0] == '':
+        four_bit_list.remove('')
+    
+    if len(four_bit_list[0]) < 4:
+        
+        no_z2a = 4-len(four_bit_list[0])
+        zeroes = ''
+        
+        for z in range(no_z2a):
+            zeroes = zeroes + '0'
+    
+        four_bit_list[0] = zeroes + four_bit_list[0]
+    
+    hexadecimal = ''
+    for h in range(len(four_bit_list)):
+        
+        hexadecimal = hexadecimal + dictionary[four_bit_list[h]]
+        
+    return(hexadecimal)
     
     
