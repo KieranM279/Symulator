@@ -7,7 +7,9 @@ Created on Mon Apr 10 16:54:25 2023
 """
 import os
 #os.chdir('/Users/kieran/Documents/Symulator/')
-os.chdir('/home/kieran/Documents/Symulator/')
+os.chdir('C:/Users/Atlas/Desktop/Symulator/')
+
+
 
 import pandas as pd
 import random
@@ -18,19 +20,21 @@ import matplotlib.pyplot as plt
 ## You can change these ##
 parameters = {'GRID_SIZE' : 128,
               'POPULATION' : 100,
-              'TICKS':3,
+              'TICKS': 3,
               
-              'INTERNAL_NEURONS':3,
-              'GENES':4}
+              'INTERNAL_NEURONS': 3,
+              'GENES': 8}
 
 
 #### Neurone dictionary ####
 
 
 neurones = {
-    'input':{'Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN'},
-    'output':{'MvN','MvE','MvS','MvW','MvR','SOsc'}
+    'input':['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN'],
+    'output':['MvN','MvE','MvS','MvW','MvR','SOsc'],
     }
+
+
 
 
 
@@ -214,34 +218,34 @@ def UpdateField():
 #### Inputs: These are the things that creatures can sense ####
 
 # Calculated age based on tick
-def Age(tick,total_ticks):
+def Age(creature_ID):
     
-    Age = (tick/total_ticks)
+    Age = (population[creature_ID]['Age']/parameters['TICKS'])
     
     return(Age)
 
 # Generate an oscillating sin wave based on tick
-def Osc(tick,pop_dict,cr_id):
+def Osc(creature_ID):
     
-    osc_period = pop_dict[cr_id]['Oscillator_period']
+    osc_period = population[creature_ID]['Oscillator_period']
     
-    y = (math.sin(tick/osc_period) + 1)/2
+    y = (math.sin(population[creature_ID]['Age']/osc_period) + 1)/2
     
     return(y)
 
-def TPo(pop_dict):
+def TPo(creature_ID):
     
     # Current population
-    curr_pop = len(pop_dict.keys())
+    curr_pop = len(population.keys())
     # Generate output value
     output = (curr_pop / parameters['POPULATION'])
     
     return(output)
 
-def LPo(pop_dict,cr_id,grid):
+def LPo(creature_ID):
     
     # Isolate the coordinates of the individual
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     
     # Generate the size of the immediate vicinity
     xmin = (Coord2Num(Coords[0]) - 3)
@@ -254,14 +258,14 @@ def LPo(pop_dict,cr_id,grid):
     creature_list = list()
     
     # Loop through all the creatures
-    for p in pop_dict.keys():
+    for p in population.keys():
         
         # Skip if it is this creature
-        if p == cr_id:
+        if p == creature_ID:
             continue
         
         # Isolate the other creatures coordinates
-        other_coord = pop_dict[p]['Coordinates']
+        other_coord = population[p]['Coordinates']
         other_x = Coord2Num(other_coord[0])
         other_y = Coord2Num(other_coord[1])
         
@@ -277,10 +281,10 @@ def LPo(pop_dict,cr_id,grid):
 
 ## Calculate the distance from the borders
 # East
-def BdE(pop_dict,cr_id):
+def BdE(creature_ID):
     
     # Isolate the coordinated of the creaure
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     x = Coord2Num(Coords[0])
     
     # Calulate the distance from the border
@@ -293,10 +297,10 @@ def BdE(pop_dict,cr_id):
     return(output)
 
 # West
-def BdW(pop_dict,cr_id):
+def BdW(creature_ID):
     
     # Isolate the coordinated of the creaure
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     x = Coord2Num(Coords[0])
     
     # Calulate the distance from the border
@@ -309,10 +313,10 @@ def BdW(pop_dict,cr_id):
     return(output)
 
 # North
-def BdN(pop_dict,cr_id):
+def BdN(creature_ID):
     
     # Isolate the coordinated of the creaure
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     y = Coord2Num(Coords[1])
     
     # Calulate the distance from the border
@@ -325,10 +329,10 @@ def BdN(pop_dict,cr_id):
     return(output)
 
 # South
-def BdS(pop_dict,cr_id):
+def BdS(creature_ID):
     
     # Isolate the coordinated of the creaure
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     y = Coord2Num(Coords[1])
     
     # Calulate the distance from the border
@@ -341,42 +345,42 @@ def BdS(pop_dict,cr_id):
     return(output)
 
 # Nearest border distance
-def NbD(pop_dict,cr_id):
+def NbD(creature_ID):
     
     # Idenitify closest border distance
-    dictionary = {BdS(pop_dict,cr_id):'South',
-                  BdN(pop_dict,cr_id):'North',
-                  BdE(pop_dict,cr_id):'East',
-                  BdW(pop_dict,cr_id):'West'}
+    dictionary = {BdS(creature_ID):'South',
+                  BdN(creature_ID):'North',
+                  BdE(creature_ID):'East',
+                  BdW(creature_ID):'West'}
     
-    listOfDist = [BdS(pop_dict,cr_id),
-                  BdN(pop_dict,cr_id),
-                  BdE(pop_dict,cr_id),
-                  BdW(pop_dict,cr_id)]
+    listOfDist = [BdS(creature_ID),
+                  BdN(creature_ID),
+                  BdE(creature_ID),
+                  BdW(creature_ID)]
     
     closest = max(listOfDist)
     closest = dictionary[closest]
     
     # Generate output for the nearest border distance
     if closest == 'North':
-        output = BdN(pop_dict,cr_id)
+        output = BdN(creature_ID)
         
     elif closest == 'South':
-        output = BdS(pop_dict,cr_id)
+        output = BdS(creature_ID)
         
     elif closest == 'East':
-        output = BdE(pop_dict,cr_id)
+        output = BdE(creature_ID)
     
     elif closest == 'West':
-        output = BdW(pop_dict,cr_id)
+        output = BdW(creature_ID)
     
     return(output)
 
 
 # Detect a blockage to the East
-def BlE(pop_dict,cr_id,grid):
+def BlE(creature_ID):
     
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     x = Coord2Num(Coords[0])
     
     east_edge = parameters['GRID_SIZE']
@@ -388,7 +392,7 @@ def BlE(pop_dict,cr_id,grid):
         if (x + i) >= east_edge:
             break
         
-        if grid[Coords[1]][Num2Coord(x+i,'x')] != '.':
+        if field[Coords[1]][Num2Coord(x+i,'x')] != '.':
             break
         
         i = i + 1
@@ -398,9 +402,9 @@ def BlE(pop_dict,cr_id,grid):
     return(output)
 
 # Detect a blockage to the East
-def BlN(pop_dict,cr_id,grid):
+def BlN(creature_ID):
     
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     y = Coord2Num(Coords[0])
     
     north_edge = parameters['GRID_SIZE']
@@ -412,7 +416,7 @@ def BlN(pop_dict,cr_id,grid):
         if (y + i) >= north_edge:
             break
         
-        if grid[Num2Coord(y+i,'y')][Coords[0]] != '.':
+        if field[Num2Coord(y+i,'y')][Coords[0]] != '.':
             break
         
         i = i + 1
@@ -423,9 +427,9 @@ def BlN(pop_dict,cr_id,grid):
     
 
 # Detect a blockage to the West
-def BlW(pop_dict,cr_id,grid):
+def BlW(creature_ID):
     
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     x = Coord2Num(Coords[0])
     
     west_edge = 0
@@ -439,7 +443,7 @@ def BlW(pop_dict,cr_id,grid):
         if (x - i) < west_edge:
             break
         
-        if grid[Coords[1]][Num2Coord(x-i,'x')] != '.':
+        if field[Coords[1]][Num2Coord(x-i,'x')] != '.':
             break
         
         i = i + 1
@@ -450,9 +454,9 @@ def BlW(pop_dict,cr_id,grid):
     
 
 # Detect a blockage to the West
-def BlS(pop_dict,cr_id,grid):
+def BlS(creature_ID):
     
-    Coords = pop_dict[cr_id]['Coordinates']
+    Coords = population[creature_ID]['Coordinates']
     y = Coord2Num(Coords[1])
     
     south_edge = 0
@@ -461,12 +465,10 @@ def BlS(pop_dict,cr_id,grid):
     
     while i < 5:
         
-        #print(i)
-        
         if (y - i) < south_edge:
             break
         
-        if grid[Num2Coord(y-i,'y')][Coords[0]] != '.':
+        if field[Num2Coord(y-i,'y')][Coords[0]] != '.':
             break
         
         i = i + 1
@@ -599,99 +601,202 @@ def SOsc(cr_id,change):
     population[cr_id]['Oscillator_period'] = population[cr_id]['Oscillator_period'] + change
 
 
-def weightGen():
-    
-    type_list = ['0','1']
-    weight = ''
-    
-    for i in range(16):
-        
-        weight = weight + random.choice(type_list)
-        
-    return(weight)
-#def GenomeGenerate():
-#    
-#    dictionary = {}
-#    
-#    
-#    input_neurons = ['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE',
-#                     'BlW','BlS','BlN']
-#    
-#    internal_neurons  = list(range(parameters['INTERNAL_NEURONS']))
-#    
-#    output_neurons = ['MvN','MvE','MvS','MvW','MvR','SOsc']
-#    
-#    type_list = [0,1]
-#    
-#    for p in population.keys():
-#        
-#        entry = {}
-#        
-#        for g in range(parameters['GENES']):
-#            
-#            source = random.choice(type_list)
-#            sink = random.choice(type_list)
-#            
-#            if source == 0 and sink == 0:
-#                
-#                entry[g] = {'source_type':0,
-#                            'source':random.choice(input_neurons),
-#                            'sink_type':0,
-#                            'sink':random.choice(internal_neurons),
-#                            'weight':round(random.uniform(-4, 4),5)}
-#                
-#            elif source == 0 and sink == 1:
-#                
-#                entry[g] = {'source_type':0,
-#                            'source':random.choice(input_neurons),
-#                            'sink_type':1,
-#                            'sink':random.choice(output_neurons),
-#                            'weight':round(random.uniform(-4, 4),5)}
-#                
-#            elif source == 1 and sink == 0:
-#                
-#                entry[g] = {'source_type':1,
-#                            'source':random.choice(internal_neurons),
-#                            'sink_type':0,
-#                            'sink':random.choice(internal_neurons),
-#                            'weight':round(random.uniform(-4, 4),5)}
-#            
-#            elif source == 1 and sink == 1:
-#                
-#                entry[g] = {'source_type':1,
-#                            'source':random.choice(internal_neurons),
-#                            'sink_type':1,
-#                            'sink':random.choice(output_neurons),
-#                            'weight':round(random.uniform(-4, 4),5)}
-#            
-#        dictionary[p] = entry
-#        
-#    return(dictionary)
-    
-    
-def GenomePrinter(cr_id,df):
-    
-    df = df[cr_id]
+
+neurone_f = {
+    'input_f':{'Age':Age,'Osc':Osc,'TPo':TPo,'LPo':LPo,'BdE':BdE,
+               'BdW':BdW,'BdN':BdN,'BdS':BdS,'NbD':NbD,'BlE':BlE,
+               'BlW':BlW,'BlS':BlS,'BlN':BlN},
+    'output_f':{'MvN':MvN,'MvE':MvE,'MvS':MvS,'MvW':MvW,'MvR':MvR,
+                'SOsc':SOsc}
+    }
+
+
+
+
+# This function creates the first randomly generated genome for 
+def GenomeCreate(gene_num):
     
     genome = list()
     
-    for g in df.keys():
+    # Do this for every gene in the genome
+    for i in range(gene_num):
         
-        gene_list = list()
-        for codo in df[g].values():
-            gene_list.append(str(codo))
+        gene = ''
+        options = ['0','1']
         
-        gene = '|'.join(gene_list)
+        for b in range(0,32,1):
+            
+            gene = gene + random.choice(options)
         
-        genome.append(gene)
+        genome.append(BinHex(gene))
     
-    genome = '\t'.join(genome)
+    return(genome)
+
+
+
+def GenomeGen():
     
-    print(genome)
+    pass
+
+# Just a function to print the genome is a convenient way
+def GenomePrinter(genome):
     
+    counter = 0
+    line = ''
+    for i in genome:
+        
+        counter += 1
+        line = line + i + ' '
+        
+        # Print every fourth line
+        if counter == 4:
+            print(line)
+            counter = 0
+            line = ''
+        # Print the remiander
+        if i == genome[-1]:
+            print(line)
+
+def WeightInterpreter(string):
+    
+    weight = (-4 + (8*(BinDec(string)/65535)))
+    
+    return(weight)
+
+def GeneInterpreter(gene):
+    
+    print("==========================================")
+    print(gene)
+    gene = HexBin(gene)
+    print(gene[0] + ' ' + gene[1:8] + ' '+ gene[8] + ' ' + gene[9:16] + ' ' + gene[16:32])
+    gene_dict = {}
+    
+    # Generate the ratio for the inoput and outputs
+    source_ratio = int(BinDec(gene[1:8]))/127
+    output_ratio = int(BinDec(gene[9:16]))/127
+    
+    # Identify the input neurone
+    if gene[0] == '0':
+        
+        gene_dict['source'] = 'Sensory neurone'
+        source_index = round(source_ratio * (len(neurones['input'])-1))
+        source_ID = neurones['input'][source_index]
+        
+    elif gene[0] == '1':
+        
+        gene_dict['source'] = 'Internal neurone'
+        source_index = round(source_ratio * (parameters['INTERNAL_NEURONS']-1))
+        source_ID = source_index
+        
+    # Identify the output neurone
+    if gene[8] == '0':
+        
+        gene_dict['output'] = 'Internal neurone'
+        output_index = round(output_ratio * (parameters['INTERNAL_NEURONS']-1))
+        output_ID = output_index
+    elif gene[8] == '1':
+        
+        gene_dict['output'] = 'Action neurone'
+        output_index = round(output_ratio * (len(neurones['output'])-1))
+        output_ID = neurones['output'][output_index]
+    
+    gene_dict['source_ID'] = source_ID
+    gene_dict['output_ID'] = output_ID
+    
+    gene_dict['weight'] = WeightInterpreter(gene[16:32])
+    
+    print("------------------------------------------")
+    print(gene_dict['source'] + ': ' + str(gene_dict['source_ID']))
+    print(gene_dict['output'] + ': ' + str(gene_dict['output_ID']))
+    print('Weight: ' + str(gene_dict['weight']))
+
+def GenePCInterpreter(gene):
+    
+    gene = HexBin(gene)
+    gene_dict = {}
+    
+    # Generate the ratio for the inoput and outputs
+    source_ratio = int(BinDec(gene[1:8]))/127
+    output_ratio = int(BinDec(gene[9:16]))/127
+    
+    # Identify the input neurone
+    if gene[0] == '0':
+        
+        gene_dict['source'] = 'Sensory neurone'
+        source_index = round(source_ratio * (len(neurones['input'])-1))
+        source_ID = neurones['input'][source_index]
+        
+    elif gene[0] == '1':
+        
+        gene_dict['source'] = 'Internal neurone'
+        source_index = round(source_ratio * (parameters['INTERNAL_NEURONS']-1))
+        source_ID = source_index
+        
+    # Identify the output neurone
+    if gene[8] == '0':
+        
+        gene_dict['output'] = 'Internal neurone'
+        output_index = round(output_ratio * (parameters['INTERNAL_NEURONS']-1))
+        output_ID = output_index
+    elif gene[8] == '1':
+        
+        gene_dict['output'] = 'Action neurone'
+        output_index = round(output_ratio * (len(neurones['output'])-1))
+        output_ID = neurones['output'][output_index]
+    
+    gene_dict['source_ID'] = source_ID
+    gene_dict['output_ID'] = output_ID
+    
+    gene_dict['weight'] = WeightInterpreter(gene[16:32])
+    
+    return(gene_dict)
+
+
+# Iterates the gene printer over an entire creatues genome
+def GenomeReader(creature_ID):
+    
+    for i in population[creature_ID]['Genome']:
+        
+        GeneInterpreter(i)
 
     
     
+def GenomeCalculation(creature_ID):
+    
+    brain = {}
+    
+    # First calculate the action potential of all of the inputs
+    for g in population[creature_ID]['Genome']:
+        
+        if HexBin(g)[0] == '0':
+            
+            node = {}
+            
+            #GeneInterpreter(g)
+            gene_dict = GenePCInterpreter(g)
+            
+            # Calculate the strength of the sensory neurones action potential
+            sense_input =  neurone_f['input_f'][gene_dict['source_ID']](creature_ID)
+            sense_weight = gene_dict['weight']
+            sense_output = sense_input * sense_weight
+            
+            # Save the output and the calculation to a dictionary
+            node['sense_input'] = sense_input
+            node['sense_weight'] = sense_weight
+            node['sense_output'] = sense_output
+            
+            
+            node['sense_target'] = gene_dict['output_ID']
+            
+            brain[g] = node
+    
+    # Secondly calulate the Intermediate neurones
+    for g in population[creature_ID]['Genome']:
+        
+        if HexBin(g)[8] == '0':
+            GeneInterpreter(g)
+            
+            
 
 #### Environment creation ####
 
@@ -741,7 +846,9 @@ def Populate(grid, grid_size, n):
             
             # Add creature to population dictionary
             dictionary[Creature_ID] = {'Coordinates':[x,y],
-                                       'Oscillator_period':10}
+                                       'Oscillator_period':10,
+                                       'Genome':GenomeCreate(parameters['GENES']),
+                                       'Age':0}
             
             # Add coordinate to checklist
             checklist.append([x,y])
@@ -774,6 +881,9 @@ def MainLoop():
         
         for c in population.keys():
             
+            # Increase the creature's age by 1
+            population[c]['Age'] += 1
+            
             # Isolate the current coordinate
             Coords = population[c]['Coordinates']
             
@@ -801,7 +911,12 @@ def MainLoop():
 MainLoop()
 
 
-#test = GenomeGenerate()
+def GlobalUpdateTest(x):
+    
+    global population
+    population['creature_0']['Oscillator_period'] = x
+    
 
-#GenomePrinter('creature_0', test)
+
+GenomeCalculation('creature_0')
 
