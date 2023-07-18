@@ -759,11 +759,42 @@ def GenomeReader(creature_ID):
         
         GeneInterpreter(i)
 
+def Gene_Checker(creature_ID):
     
+    output_list = list()
+    direction_list = list()
     
+    for g in population[creature_ID]['Genome']:
+        
+        # Generate gene dictionary
+        gene_dict = GenePCInterpreter(g)
+        
+        # If there connection is between 2 internal neurones
+        if gene_dict['source'] == gene_dict['output']:
+            
+            # If the connection is between the same neurone
+            if (gene_dict['source_ID'] == gene_dict['output_ID']):
+                output_list.append(g)
+            else:
+                
+                direction = [gene_dict['source_ID'],gene_dict['output_ID']]
+                
+                # If reverse direction in direcion list
+                if rev(direction) in direction_list:
+                    output_list.append(g)
+                else:
+                    direction_list.append(direction)
+    
+    return(output_list)
+                
+            
+            
+        
+
 def GenomeCalculation(creature_ID):
     
     brain = {}
+    gene_skip = Gene_Checker(creature_ID)
     
     # First calculate the action potential of all of the inputs
     for g in population[creature_ID]['Genome']:
@@ -790,11 +821,28 @@ def GenomeCalculation(creature_ID):
             
             brain[g] = node
     
-    # Secondly calulate the Intermediate neurones
+    # Create a dictionry to mark if an internal neurone is ready
+    ready_dict = {}
+    for internal in range(parameters['INTERNAL_NEURONS']):
+        ready_dict[internal] = 'nope'
+    
     for g in population[creature_ID]['Genome']:
         
-        if HexBin(g)[8] == '0':
-            GeneInterpreter(g)
+        gene_dict = GenePCInterpreter(g)
+        
+        if(gene_dict['output'] == 'Internal neurone'):
+        
+            
+            
+    
+    
+    
+    # Secondly calulate the Intermediate neurones
+    #for g in population[creature_ID]['Genome']:
+    #    
+    #    if HexBin(g)[8] == '0':
+    #        GeneInterpreter(g)
+    print(brain.keys())
             
             
 
@@ -918,5 +966,5 @@ def GlobalUpdateTest(x):
     
 
 
-GenomeCalculation('creature_0')
+brain_test = GenomeCalculation('creature_0')
 
