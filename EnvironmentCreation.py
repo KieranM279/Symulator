@@ -69,6 +69,20 @@ def rev(x):
     
     return(new_out)
 
+# Function to return the depth of a dictionary
+def dict_depth(df,level=1):
+      
+    str_df = str(df)
+    counter = 0
+    for i in str_df:
+        if i == "{":
+            counter += 1
+        elif i == "}":
+            break
+    return(counter)
+
+
+
 # Converts Binary strings to decimals
 def BinDec(string):
     
@@ -786,9 +800,34 @@ def Gene_Checker(creature_ID):
                     direction_list.append(direction)
     
     return(output_list)
-                
+
+
+def ready_checker(creature_ID):
+    
+    dictionary = {}
+    # Create a dictionry to mark if an internal neurone is ready
+    for internal in range(parameters['INTERNAL_NEURONS']):
+        dictionary[internal] = {'status':'nope','input_check':list()}
+        
+        
+    for g in population[creature_ID]['Genome']:
+        
+        gene_dict = GenePCInterpreter(g)
+        
+        if((gene_dict['output'] == 'Internal neurone') and
+           (gene_dict['source'] == 'Internal neurone')):
             
             
+            dictionary[gene_dict['source_ID']]['input_check'].append(1)
+    
+    for int_gene in dictionary.keys():
+        
+        if sum(dictionary[int_gene]['input_check']) == 0:
+            
+            dictionary[int_gene]['status'] = 'Yes'
+    return(dictionary)
+    
+    
         
 
 def GenomeCalculation(creature_ID):
@@ -812,29 +851,131 @@ def GenomeCalculation(creature_ID):
             sense_output = sense_input * sense_weight
             
             # Save the output and the calculation to a dictionary
-            node['sense_input'] = sense_input
-            node['sense_weight'] = sense_weight
-            node['sense_output'] = sense_output
+            node['node_input'] = sense_input
+            node['node_weight'] = sense_weight
+            node['node_output'] = sense_output
             
             
-            node['sense_target'] = gene_dict['output_ID']
+            node['node_target'] = gene_dict['output_ID']
             
             brain[g] = node
     
-    # Create a dictionry to mark if an internal neurone is ready
-    ready_dict = {}
-    for internal in range(parameters['INTERNAL_NEURONS']):
-        ready_dict[internal] = 'nope'
+    # Import a dictionary of ready neurones
+    ready_dict = ready_checker(creature_ID)
+
     
+    
+    # Second pass: Intermediate neurones with only sense inputs
     for g in population[creature_ID]['Genome']:
         
-        gene_dict = GenePCInterpreter(g)
+        # Skip the useless genes
+        if g in gene_skip:
+            continue
         
-        if(gene_dict['output'] == 'Internal neurone'):
-        
+        # If the source is an intermediate neurone
+        if HexBin(g)[0] == '1':
             
+            gene_dict = GenePCInterpreter(g)
             
+            # If the gene is ready to be calculated
+            if ready_dict[gene_dict['source_ID']]['status'] == 'Yes':
+                
+                in_list_p1 = list()
+                
+                # Search the brain for inputs
+                for b in brain.keys():
+                    
+                    # Find the relevent inputs from the already calculated genes
+                    if brain[b]['node_target'] == gene_dict['source_ID']:
+                        in_list_p1.append(brain[b]['node_output'])
+                        
+                node = {}
+                node['node_input'] = math.tanh(sum(in_list_p1))
+                node['node_weight'] = gene_dict['weight']
+                node['node_output'] = node['node_input'] * node['node_weight']
+                node['node_target'] = gene_dict['output_ID']
+                
+                brain[g] = node
     
+    
+    
+    # Third pass: Intermediate neurones with only sense inputs
+    for g in population[creature_ID]['Genome']:
+        
+        # Skip the useless genes
+        if g in gene_skip:
+            continue
+        
+        # If the source is an intermediate neurone
+        if HexBin(g)[0] == '1':
+            
+            gene_dict = GenePCInterpreter(g)
+            
+            # If was previously not ready to be calculated (It should be now)
+            if ready_dict[gene_dict['source_ID']]['status'] == 'nope':
+                
+                in_list_p2 = list()
+                
+                # Search the brain for inputs
+                for b in brain.keys():
+                    
+                    # Find the relevent inputs from the already calculated genes
+                    if brain[b]['node_target'] == gene_dict['source_ID']:
+                        in_list_p2.append(brain[b]['node_output'])
+                        
+                node = {}
+                node['node_input'] = math.tanh(sum(in_list_p2))
+                node['node_weight'] = gene_dict['weight']
+                node['node_output'] = node['node_input'] * node['node_weight']
+                node['node_target'] = gene_dict['output_ID']
+                
+                brain[g] = node
+    
+    action_list = list()
+    # Fourth pass: The Actions neurones
+    
+    # Make a list of the actions that the creature has access to
+    for g in population[creature_ID]['Genome']:
+        
+        if HexBin(g)[8] == '1':
+            gene_dict = GenePCInterpreter(g)
+            
+            if gene_dict['output_ID'] in action_list:
+                continue
+            
+            action_list.append(gene_dict['output_ID'])
+    
+    
+    for a in action_list:
+        
+        action_in_list = list()
+        
+        for b in brain.keys():
+            
+            if brain[b]['node_target'] == a:
+                
+                action_in_list.append(brain[b]['node_output'])
+    
+        print(a)
+        print(math.tanh(sum(action_in_list)))
+    
+    # Loop through each action
+    #for a in action_list:
+    #    
+    #    action_in_list = list()
+    #    
+    #    # Loop through all the calculated genes
+    #    for b in brain.keys():
+    #        
+    #        if brain[b]['node_target'] == a:
+    #            
+    #            action_list.append(brain[b]['node_output'])
+    #        
+    #    print(a)
+    #    print(action_in_list)
+        
+    
+    #print(brain)
     
     
     # Secondly calulate the Intermediate neurones
@@ -842,9 +983,8 @@ def GenomeCalculation(creature_ID):
     #    
     #    if HexBin(g)[8] == '0':
     #        GeneInterpreter(g)
-    print(brain.keys())
-            
-            
+    #print(brain.keys())
+
 
 #### Environment creation ####
 
