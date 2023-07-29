@@ -14,7 +14,7 @@ os.chdir('C:/Users/Atlas/Desktop/Symulator/')
 import pandas as pd
 import random
 import math
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 #### Parameter declarations ####
 ## You can change these ##
@@ -23,7 +23,7 @@ parameters = {'GRID_SIZE' : 128,
               'TICKS': 3,
               
               'INTERNAL_NEURONS': 3,
-              'GENES': 8}
+              'GENES': 16}
 
 
 #### Neurone dictionary ####
@@ -497,7 +497,11 @@ def BlS(creature_ID):
 #### Outputs: These are the Actions that Each Creature can take ####
 
 # Return a coordinate one north of the input coordinate
-def MvN(Coords,grid,grid_size):
+def MvN(creature_ID):
+    
+    Coords = population[creature_ID]['Coordinates']
+    grid = field
+    grid_size = parameters['GRID_SIZE']
     
     # The Current coordinates
     x = Coords[0]
@@ -511,19 +515,30 @@ def MvN(Coords,grid,grid_size):
     N_y = N_y + 1
     N_y = Num2Coord(N_y, 'y')
     
-    
+    # Fail to do anything
     if (Coord2Num(N_y) > (grid_size-1)):
-        return([x,y])
+        new_coords = [x,y]
+        
     elif grid[N_y][N_x] != '.':
-        return([x,y])
+        new_coords = [x,y]
+        
+    # Actually update global variables
     elif grid[N_y][N_x] == '.':
-        return([N_x,N_y])
+        new_coords = [N_x,N_y]
+        
+    # Or just freak out
     else:
         print("Error in move north")
-        return("help")
+    
+    return(new_coords)
+    
 
 # Return a coordinate one south of the input coordinate
-def MvS(Coords,grid,grid_size):
+def MvS(creature_ID):
+    
+    Coords = population[creature_ID]['Coordinates']
+    grid = field
+    #grid_size = parameters['GRID_SIZE']
     
     # The Current coordinates
     x = Coords[0]
@@ -538,18 +553,29 @@ def MvS(Coords,grid,grid_size):
     N_y = Num2Coord(N_y, 'y')
     
     
+    # Fail to do anything
     if (Coord2Num(N_y) < 0):
-        return([x,y])
+        new_coords = [x,y]
+        
     elif grid[N_y][N_x] != '.':
-        return([x,y])
+        new_coords = [x,y]
+        
+    # Actually update global variables
     elif grid[N_y][N_x] == '.':
-        return([N_x,N_y])
+        new_coords = [N_x,N_y]
+        
+    # Or just freak out
     else:
         print("Error in move south")
-        return("help")
+    
+    return(new_coords)
 
 # Return a coordinate one east of the input coordinate
-def MvE(Coords,grid,grid_size):
+def MvE(creature_ID):
+    
+    Coords = population[creature_ID]['Coordinates']
+    grid = field
+    grid_size = parameters['GRID_SIZE']
     
     # The Current coordinates
     x = Coords[0]
@@ -563,19 +589,29 @@ def MvE(Coords,grid,grid_size):
     N_x = N_x + 1
     N_x = Num2Coord(N_x, 'x')
     
-    
+    # Fail to do anything
     if (Coord2Num(N_x) > (grid_size-1)):
-        return([x,y])
+        new_coords = [x,y]
+        
     elif grid[N_y][N_x] != '.':
-        return([x,y])
+        new_coords = [x,y]
+        
+    # Actually update global variables
     elif grid[N_y][N_x] == '.':
-        return([N_x,N_y])
+        new_coords = [N_x,N_y]
+        
+    # Or just freak out
     else:
-        print("Error in move East")
-        return("help")
+        print("Error in move east")
+    
+    return(new_coords)
 
 # Return a coordinate one west of the input coordinate
-def MvW(Coords,grid,grid_size):
+def MvW(creature_ID):
+    
+    Coords = population[creature_ID]['Coordinates']
+    grid = field
+    #grid_size = parameters['GRID_SIZE']
     
     # The Current coordinates
     x = Coords[0]
@@ -590,22 +626,29 @@ def MvW(Coords,grid,grid_size):
     N_x = Num2Coord(N_x, 'x')
     
     
+    # Fail to do anything
     if (Coord2Num(N_x) < 0):
-        return([x,y])
+        new_coords = [x,y]
+        
     elif grid[N_y][N_x] != '.':
-        return([x,y])
+        new_coords = [x,y]
+        
+    # Actually update global variables
     elif grid[N_y][N_x] == '.':
-        return([N_x,N_y])
+        new_coords = [N_x,N_y]
+        
+    # Or just freak out
     else:
-        print("Error in move West")
-        return("help")
+        print("Error in move west")
+    
+    return(new_coords)
 
-def MvR(Coords,grid,grid_size):
+def MvR(creature_ID):
     
     my_list = [MvE, MvS, MvE, MvW]
-    return(random.choice(my_list)(Coords,grid,grid_size))
+    return(random.choice(my_list)(creature_ID))
 
-def OmPh(pop_dict,cr_id):
+def OmPh(creature_ID):
     pass
 
 
@@ -645,12 +688,6 @@ def GenomeCreate(gene_num):
         genome.append(BinHex(gene))
     
     return(genome)
-
-
-
-def GenomeGen():
-    
-    pass
 
 # Just a function to print the genome is a convenient way
 def GenomePrinter(genome):
@@ -827,8 +864,33 @@ def ready_checker(creature_ID):
             dictionary[int_gene]['status'] = 'Yes'
     return(dictionary)
     
+def DecisionMaker(df):
     
+    what_am_i_doing = list()
+    
+    # Loop through calculated action neurones
+    for i in df.keys():
         
+        if df[i] <= 0:
+            continue
+        else:
+            
+            # Generate the chances of success or failure
+            success_multiplier = (round(df[i]*1000))
+            failure_multiplier = 1000 - success_multiplier
+            
+            option_list = (['yes']*success_multiplier) + (['no']*failure_multiplier)
+            
+            # Genreate the final choice
+            outcome = random.choice(option_list)
+            
+            if outcome == 'no':
+                continue
+            else:
+                what_am_i_doing.append(i)
+    
+    return(what_am_i_doing)
+            
 
 def GenomeCalculation(creature_ID):
     
@@ -945,6 +1007,9 @@ def GenomeCalculation(creature_ID):
             
             action_list.append(gene_dict['output_ID'])
     
+    # Make a dictionary of all the final choices the that the creature can make
+    # Dictionary of action neurones and final weighting
+    choice_dict = {}
     
     for a in action_list:
         
@@ -953,37 +1018,15 @@ def GenomeCalculation(creature_ID):
         for b in brain.keys():
             
             if brain[b]['node_target'] == a:
-                
                 action_in_list.append(brain[b]['node_output'])
     
-        print(a)
-        print(math.tanh(sum(action_in_list)))
+        choice_dict[a] = math.tanh(sum(action_in_list))
     
-    # Loop through each action
-    #for a in action_list:
-    #    
-    #    action_in_list = list()
-    #    
-    #    # Loop through all the calculated genes
-    #    for b in brain.keys():
-    #        
-    #        if brain[b]['node_target'] == a:
-    #            
-    #            action_list.append(brain[b]['node_output'])
-    #        
-    #    print(a)
-    #    print(action_in_list)
-        
+    #print(choice_dict)
     
-    #print(brain)
+    what_am_i_doing = DecisionMaker(choice_dict)
     
-    
-    # Secondly calulate the Intermediate neurones
-    #for g in population[creature_ID]['Genome']:
-    #    
-    #    if HexBin(g)[8] == '0':
-    #        GeneInterpreter(g)
-    #print(brain.keys())
+    return(what_am_i_doing)
 
 
 #### Environment creation ####
@@ -1065,32 +1108,40 @@ actions = [MvR]
 
 def MainLoop():
     
+    global population
+    global field
+    
     for t in range(parameters['TICKS']):
-        
+        print(t)
         for c in population.keys():
             
             # Increase the creature's age by 1
             population[c]['Age'] += 1
             
-            # Isolate the current coordinate
-            Coords = population[c]['Coordinates']
+            # Calculate what the creature is going to do
+            action_list = GenomeCalculation(c)
             
-            # Generate the new Coordinates
-            New_Coords = random.choice(actions)(Coords,field,parameters['GRID_SIZE'])
-            
-            # Update the Populations data
-            population[c]['Coordinates'] = New_Coords
-            
-            # Update the Fields
-            y = Coords[1]
-            x = Coords[0]
-            
-            N_y = New_Coords[1]
-            N_x = New_Coords[0]
-            
-            field[y][x] = '.'
-            field[N_y][N_x] = 'c'
-        
+            # If there are any actions to carry out
+            if len(action_list) > 0:
+                
+                # Loop through the actions
+                for a in action_list:
+                    
+                    old_coordinates = population[c]['Coordinates']
+                    
+                    if a == 'SOsc':
+                       neurone_f['output_f'][a](c,1)
+                       continue
+                   
+                    # Call the actual action function
+                    new_coordinates = neurone_f['output_f'][a](c)
+                    
+                    # Update the grid
+                    field[old_coordinates[1]][old_coordinates[0]] = '.'
+                    field[new_coordinates[1]][new_coordinates[0]] = 'c'
+                    
+                    population[c]['Coordinates'] = new_coordinates
+                    
         filename_field = ('Outputs/' + str(t) + '_field.csv')
         filename_pop = ('Outputs/' + str(t) + '_populations.csv')
         getArray(field).to_csv(filename_field)
@@ -1106,5 +1157,5 @@ def GlobalUpdateTest(x):
     
 
 
-brain_test = GenomeCalculation('creature_0')
+#brain_test = GenomeCalculation('creature_0')
 
