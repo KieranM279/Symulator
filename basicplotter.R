@@ -55,6 +55,28 @@ basic_plotter <- function(filename) {
   
 }
 
-print(basic_plotter('0_field.csv'))
-print(basic_plotter('1_field.csv'))
-print(basic_plotter('2_field.csv'))
+for (i in seq(0,299,1)) {
+  print(i)
+  
+  
+  ggsave(basic_plotter(paste(i,'field.csv',sep="_")),
+         filename = paste('../frames/',i,'_field.png',sep=""),
+         width = 10,
+         height = 10,
+         device = 'png')
+  
+  
+}
+
+
+
+#print(basic_plotter('0_field.csv'))
+#print(basic_plotter('1_field.csv'))
+#print(basic_plotter('2_field.csv'))
+
+
+#ggsave(basic_plotter('0_field.csv'),
+#       filename = '0_field.png',
+#       width = 10,
+#       height = 10,
+#       device = 'png')
