@@ -16,14 +16,22 @@ import random
 import math
 #import matplotlib.pyplot as plt
 
+# Survival
+# Inheritance
+# data output
+
+
 #### Parameter declarations ####
 ## You can change these ##
 parameters = {'GRID_SIZE' : 128,
               'POPULATION' : 100,
+              
+              "GENERATIONS": 2,
               'TICKS': 3,
               
-              'INTERNAL_NEURONS': 3,
-              'GENES': 16}
+              'GENES': 24,
+              'INTERNAL_NEURONS': 4,
+              'MUTATION_RATE': 0.001}
 
 
 #### Neurone dictionary ####
@@ -36,16 +44,24 @@ neurones = {
 
 
 
+#### Survival criteria ####
 
-
-
-## You probably don't want to change these ##
-input_args = {}
-
-
-#test
-
-
+def Fate(creature_ID):
+    
+    # Where is the creature
+    location = population[creature_ID]['Coordinates']
+    x = Coord2Num(location[0])
+    #y = Coord2Num(location[1])
+    
+    # Where should they be
+    line = parameters['GRID_SIZE']/2
+    
+    # Outcome
+    if x < line:
+        return("Died")
+    else:
+        return('Survived')
+    
 #### Useful functions ####
 
 # Reverses lists and sequences
@@ -839,6 +855,7 @@ def Gene_Checker(creature_ID):
     return(output_list)
 
 
+
 def ready_checker(creature_ID):
     
     dictionary = {}
@@ -1028,6 +1045,39 @@ def GenomeCalculation(creature_ID):
     
     return(what_am_i_doing)
 
+def mutate(genome):
+    
+    rate = parameters['MUTATION_RATE']
+    df = {"0":"1","1":"0"}
+    choice = ['yes','no']
+
+    # Loop through the length of the genome
+    for g in range(len(genome)):
+        
+        gene = HexBin(genome[g])
+        new_gene = ''
+        
+        # Loop through each base
+        for b in gene:
+            
+            # Decide if base will change
+            outcome = random.choices(choice,
+                                     weights = [rate,(1-rate)],
+                                     k=1)
+            
+            # Insert new base
+            if outcome == ['no']:
+                new_gene = new_gene + b
+            elif outcome == ['yes']:
+                new_gene = new_gene + df[b]
+        
+        # Insert new gene
+        genome[g] = BinHex(new_gene)
+
+    return(genome)
+
+
+
 
 #### Environment creation ####
 
@@ -1079,7 +1129,8 @@ def Populate(grid, grid_size, n):
             dictionary[Creature_ID] = {'Coordinates':[x,y],
                                        'Oscillator_period':10,
                                        'Genome':GenomeCreate(parameters['GENES']),
-                                       'Age':0}
+                                       'Age':0,
+                                       'status':'unconfirmed'}
             
             # Add coordinate to checklist
             checklist.append([x,y])
@@ -1104,9 +1155,9 @@ population, field = Populate(field,
                       parameters['GRID_SIZE'],
                       parameters['POPULATION'])
 
-actions = [MvR]
 
-def MainLoop():
+
+def gen_sim(gen):
     
     global population
     global field
@@ -1147,8 +1198,75 @@ def MainLoop():
         getArray(field).to_csv(filename_field)
         getArray(population).to_csv(filename_pop)
 
-MainLoop()
 
+
+def Death():
+    
+    # Import the real population
+    global population
+    
+    # Update the fate of all the creatures
+    for c in population.keys():
+        population[c]['status'] = Fate(c)
+
+def Inheritance():
+    
+    global population
+    global field
+    
+    new_population, new_field = Populate(FieldGen(parameters['GRID_SIZE']), 
+                          parameters['GRID_SIZE'],
+                          parameters['POPULATION'])
+    
+    survived_list = list()
+    # Loop though the whole populations
+    for c in population.keys():
+        # Note the ones who survived
+        if population[c]['status'] == 'Survived':
+            survived_list.append(c)
+    
+    # Loop through the new population
+    for b in new_population.keys():
+        
+        # Choose two new parents
+        cr_parents = random.sample(survived_list,2)
+        cr_id_a = cr_parents[0]
+        cr_id_b = cr_parents[1]
+        
+        # Comine the parent genomes
+        genome_soup = population[cr_id_a]['Genome'] + population[cr_id_b]['Genome']
+        
+        # Generate the new offspring's genome
+        new_genome = random.sample(genome_soup,parameters['GENES'])
+        
+        new_genome = mutate(new_genome)
+        
+        # Give it to the new creature
+        new_population[b]['Genome'] = new_genome
+    
+    population = new_population
+    field = new_field
+        
+    
+    
+    
+
+def Simulation():
+    
+    for g in range(parameters['GENERATIONS']):
+        
+        # This simulates one generation
+        gen_sim(g)
+        
+        # This function selectively kills the creatures
+        Death()
+        
+        # Create the new generation
+        Inheritance()
+        
+        
+
+Simulation()
 
 def GlobalUpdateTest(x):
     
