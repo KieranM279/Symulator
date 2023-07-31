@@ -27,7 +27,7 @@ parameters = {'GRID_SIZE' : 128,
               'POPULATION' : 100,
               
               "GENERATIONS": 50,
-              "SAVED_GENERATIONS":[0,1,5,10,49],
+              "SAVED_GENERATIONS":[0,1,5,10,20,30,49],
               'TICKS': 300,
               
               'GENES': 24,
@@ -1174,9 +1174,12 @@ def gen_sim(gen):
     
     global population
     global field
-    
+    print("=================================================================")
+    print("Simulating generation: " +str(gen))
     for t in range(parameters['TICKS']):
-        print(t)
+        
+        if t%50 == 0:
+            print(t)
         for c in population.keys():
             
             # Increase the creature's age by 1
