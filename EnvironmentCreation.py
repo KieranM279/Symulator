@@ -26,8 +26,9 @@ import math
 parameters = {'GRID_SIZE' : 128,
               'POPULATION' : 100,
               
-              "GENERATIONS": 2,
-              'TICKS': 3,
+              "GENERATIONS": 50,
+              "SAVED_GENERATIONS":[0,1,5,10,49],
+              'TICKS': 300,
               
               'GENES': 24,
               'INTERNAL_NEURONS': 4,
@@ -41,6 +42,18 @@ neurones = {
     'input':['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN'],
     'output':['MvN','MvE','MvS','MvW','MvR','SOsc'],
     }
+
+
+
+
+def DirMaker():
+    
+    os.mkdir('Outputs/')
+    
+    for g in parameters['SAVED_GENERATIONS']:
+        
+        os.mkdir('Outputs/Generation' + str(g))
+DirMaker()
 
 
 
@@ -1192,11 +1205,12 @@ def gen_sim(gen):
                     field[new_coordinates[1]][new_coordinates[0]] = 'c'
                     
                     population[c]['Coordinates'] = new_coordinates
-                    
-        filename_field = ('Outputs/' + str(t) + '_field.csv')
-        filename_pop = ('Outputs/' + str(t) + '_populations.csv')
-        getArray(field).to_csv(filename_field)
-        getArray(population).to_csv(filename_pop)
+        
+        if gen in parameters['SAVED_GENERATIONS']:
+            filename_field = ('Outputs/Generation'+ str(gen) +'/'+ str(t) + '_field.csv')
+            filename_pop = ('Outputs/Generation'+ str(gen) +'/'+ str(t) + '_populations.csv')
+            getArray(field).to_csv(filename_field)
+            getArray(population).to_csv(filename_pop)
 
 
 
