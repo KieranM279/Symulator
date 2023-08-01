@@ -7,8 +7,8 @@ Created on Mon Apr 10 16:54:25 2023
 """
 import os
 #os.chdir('/Users/kieran/Documents/Symulator/')
-os.chdir('C:/Users/Atlas/Desktop/Symulator/')
-
+#os.chdir('C:/Users/Atlas/Desktop/Symulator/')
+os.chdir('/Users/kieran/Documents/Symulator/')
 
 
 import pandas as pd
@@ -23,16 +23,39 @@ import math
 
 #### Parameter declarations ####
 ## You can change these ##
-parameters = {'GRID_SIZE' : 128,
-              'POPULATION' : 100,
-              
-              "GENERATIONS": 50,
-              "SAVED_GENERATIONS":[0,1,5,10,20,30,49],
-              'TICKS': 300,
-              
-              'GENES': 24,
-              'INTERNAL_NEURONS': 4,
-              'MUTATION_RATE': 0.001}
+def FindParameters(filename):
+    
+    dictionary = {}
+    
+    # Open the file
+    file = open(filename)
+    # Parse the contents
+    for ln in file.readlines():
+        ln = ln.split()
+        
+        # Process savde gemeration list
+        if ln[0] == 'SAVED_GENERATIONS':
+            new_list = list()
+            
+            # Remove the rubbish
+            ln[1] = ln[1].strip('][')
+            ln[1] = ln[1].split(',')
+            # Convert to numeric
+            for n in ln[1]:
+                new_list.append(int(n))
+            ln[1] = new_list
+        # Process mutation rate floating point
+        elif ln[0] == 'MUTATION_RATE':
+            ln[1] = float(ln[1])
+        # Conver to integer  
+        else:
+            ln[1] = int(ln[1])
+        
+        dictionary[ln[0]] = ln[1]
+    return(dictionary)
+        
+    
+parameters = FindParameters('parameters.txt')
 
 
 #### Neurone dictionary ####
@@ -49,10 +72,12 @@ neurones = {
 def DirMaker():
     
     os.mkdir('Outputs/')
+    os.mkdir('frames/')
     
     for g in parameters['SAVED_GENERATIONS']:
         
         os.mkdir('Outputs/Generation' + str(g))
+        os.mkdir('frames/Generation' + str(g))
 DirMaker()
 
 
@@ -1095,7 +1120,6 @@ def mutate(genome):
 #### Environment creation ####
 
 def FieldGen(grid_size):
-    print("Generating empty world...")
     
     dictionary = {}
     for y in range(grid_size):
@@ -1116,7 +1140,6 @@ def FieldGen(grid_size):
 #### Populate the world ####
 
 def Populate(grid, grid_size, n):
-    print("Populating world...")
     
     dictionary = {}
     checklist = list()
@@ -1158,12 +1181,14 @@ def Populate(grid, grid_size, n):
 
 #### Begin the simulation ###
 
+print("Generating empty world...")
 # Generate an empty field in the physical world
 field = FieldGen(parameters['GRID_SIZE'])
 
 # Generate identical field in the pheromone field
 pheromone_field = FieldGen(parameters['GRID_SIZE'])
 
+print("Populating world...")
 population, field = Populate(field, 
                       parameters['GRID_SIZE'],
                       parameters['POPULATION'])

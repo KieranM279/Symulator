@@ -1,39 +1,70 @@
-#setwd('~/Documents/Symulator/Outputs')
-setwd('C:/Users/Atlas/Desktop/Symulator/Outputs')
+setwd('~/Documents/Symulator/Outputs')
+#setwd('C:/Users/Atlas/Desktop/Symulator/Outputs')
 
 library('ggplot2')
-
-# Add in the simulation parameters
-
+library('hash')
 
 
+#### Import the simulation parameters ####
+
+readParameters <- function(filename) {
+  dictionary <- hash()
+  # Read in text file
+  data = read.delim(filename,
+                    sep="",
+                    header = FALSE)
+  colnames(data) <- c("parameter","value")
+  
+  # Process data into dictionary
+  for (p in 1:nrow(data)){
+    
+    # Convert the list of saved generations
+    if (data$parameter[p] == 'SAVED_GENERATIONS'){
+      new_list <- data$value[p]
+      new_list <- substring(new_list,2,nchar(new_list)-1)
+      new_list <- strsplit(new_list,",")
+      dictionary[data$parameter[p]] <- new_list
+    } else {
+      dictionary[data$parameter[p]] <- as.numeric(data$value[p])
+    }
+  }
+  return(dictionary)
+}
+
+parameters = readParameters('../parameters.txt')
+
+#### Useful functions for plotting ####
+
+# Convert the odd coodinate layout I chose when I started this
 convert_coordinates <- function(list_of_coords){
   # Loop through list of coordinates
   for (i in 1:length(list_of_coords)) {
-    # Remove the 
+    # Remove the axis letter
     list_of_coords[i] <- substring(list_of_coords[i],3,nchar(list_of_coords[i]))
   }
   return(list_of_coords)
 }
 
-
-title_gen <- function(df,tick) {
-  population <- nrow(df)
+# Generate the legend title for the plot
+title_gen <- function(para,tick,gen) {
+  population <- para[['POPULATION']]
   spacer = ""
   
   # Enter parameters here
-  generation = 1
-  gene_no = 16
-  int_no = 3
-  grid_size = "128x128"
+  generation = gen
+  gene_no = para[['GENES']]
+  int_no = para[['INTERNAL_NEURONS']]
+  mutation_no = para[['MUTATION_RATE']]
+  grid_size = paste(para[['GRID_SIZE']],para[['GRID_SIZE']],sep="x")
   
-  # Processing the parameters
+  # Processing the parameters to readable text
   title <- "Simulation parameters:"
   population <- paste("No. organisms = ", population,sep="")
   generation <- paste("Generation = ",generation,sep="")
   tick <- paste("Tick = ",tick,sep="")
   gene_no <- paste("No. genes = ",gene_no,sep="")
   int_no <- paste("No. internal neurones = ",int_no,sep="")
+  mutation_no <- paste("Mutation rate = ", mutation_no,sep="")
   grid_size <- paste("Grid size = ",grid_size,sep="")
   
   # Generate final title
@@ -45,6 +76,7 @@ title_gen <- function(df,tick) {
                       spacer,
                       gene_no,
                       int_no,
+                      mutation_no,
                       spacer,
                       grid_size,
                       spacer,
@@ -53,8 +85,8 @@ title_gen <- function(df,tick) {
 }
 
 
-
-basic_plotter <- function(filename,tick) {
+# The plotting function
+basic_plotter <- function(filename,tick,gen) {
   
   # Import the field
   grid <- read.csv(filename)
@@ -90,39 +122,33 @@ basic_plotter <- function(filename,tick) {
           axis.ticks = element_blank(),
           legend.text = element_text(size=15),
           legend.background = element_rect(fill="lightblue",
-                                     size=0.5, linetype="solid", 
+                                     linewidth=0.5, linetype="solid", 
                                      colour ="darkblue")) +
-    guides(fill=guide_legend(title_gen(df,tick)))
+    guides(fill=guide_legend(title_gen(parameters,tick,gen)))
   return(plot)
   
   
 }
 
 
-#print(basic_plotter('0_field.csv',0))
-
-for (i in seq(0,299,1)) {
-  print(i)
+for (g in parameters[['SAVED_GENERATIONS']][[1]]) {
   
+  gen_name <- paste("Generation",g,sep = "")
+  print(paste("Plotting generation ",g,sep = ""))
   
-  ggsave(basic_plotter(paste(i,'field.csv',sep="_"),i),
-         filename = paste('../frames/',i,'_field.png',sep=""),
-         width = 10,
-         height = 7,
-         device = 'png')
-  
-  
+  for (t in 0:(parameters[['TICKS']]-1)) {
+    
+    # Generate file names
+    file_input <- paste(gen_name,'/',t,'_field.csv',sep = '')
+    file_output <- paste('../frames/',gen_name,'/',t,'_frame.png',sep = "")
+    # Plot field
+    ggsave(basic_plotter(file_input,t,g),
+           filename = file_output,
+           width = 10,
+           height = 7,
+           device = 'png')
+  }
 }
 
 
 
-#print(basic_plotter('0_field.csv'))
-#print(basic_plotter('1_field.csv'))
-#print(basic_plotter('2_field.csv'))
-
-
-#ggsave(basic_plotter('0_field.csv'),
-#       filename = '0_field.png',
-#       width = 10,
-#       height = 10,
-#       device = 'png')
