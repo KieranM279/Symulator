@@ -14,6 +14,8 @@ os.chdir('/Users/kieran/Documents/Symulator/')
 import pandas as pd
 import random
 import math
+import shutil
+
 #import matplotlib.pyplot as plt
 
 # Survival
@@ -68,9 +70,16 @@ neurones = {
 
 
 
-
+# Generates the required directories for the output
 def DirMaker():
     
+    # Delete directories of they exist
+    if os.path.isdir('Outputs/'):
+        shutil.rmtree('Outputs/')
+    if os.path.isdir('frames/'):
+        shutil.rmtree('frames/')
+    
+    # Remake the parent directories
     os.mkdir('Outputs/')
     os.mkdir('frames/')
     
@@ -80,7 +89,30 @@ def DirMaker():
         os.mkdir('frames/Generation' + str(g))
 DirMaker()
 
-
+# Calulates distance between two points
+def diagDist(coords1,coords2):
+    
+    # Convert wierd coordinate format
+    x1 = Coord2Num(coords1[0])
+    y1 = Coord2Num(coords1[1])
+    
+    x2 = (coords2[0])
+    y2 = (coords2[1])
+    
+    # Calculate x distances
+    if x1 > x2 :
+        x_dif = x1-x2
+    elif x2 >= x1:
+        x_dif = x2-x1
+    # Calculate y distances
+    if y1 > y2 :
+        y_dif = y1-y2
+    elif y2 >= y1:
+        y_dif = y2-y1
+    
+    distance = math.sqrt((x_dif**2)+(y_dif**2))
+    
+    return(distance)
 
 #### Survival criteria ####
 
@@ -99,7 +131,25 @@ def Fate(creature_ID):
         return("Died")
     else:
         return('Survived')
+
+def corner_fate(creature_ID):
     
+    # Where is the creature
+    location = population[creature_ID]['Coordinates']
+    corners = [[0,0],[127,127],[0,127],[127,0]]
+    
+    fate = "Died"
+    
+    for d in corners:
+        distan = diagDist(location,d)
+        
+        if distan <= 10:
+            fate = 'Survived'
+            break
+    
+    return(fate)
+
+
 #### Useful functions ####
 
 # Reverses lists and sequences
@@ -122,19 +172,6 @@ def rev(x):
             new_out.append(x[-i])
     
     return(new_out)
-
-# Function to return the depth of a dictionary
-def dict_depth(df,level=1):
-      
-    str_df = str(df)
-    counter = 0
-    for i in str_df:
-        if i == "{":
-            counter += 1
-        elif i == "}":
-            break
-    return(counter)
-
 
 
 # Converts Binary strings to decimals
@@ -278,10 +315,6 @@ def Num2Coord(num, axis):
 
     
     
-        
-        
-def UpdateField():
-    pass
 
 #### Inputs: These are the things that creatures can sense ####
 
@@ -1203,7 +1236,7 @@ def gen_sim(gen):
     print("Simulating generation: " +str(gen))
     for t in range(parameters['TICKS']):
         
-        if t%50 == 0:
+        if t%20 == 0:
             print(t)
         for c in population.keys():
             
@@ -1310,12 +1343,5 @@ def Simulation():
 
 Simulation()
 
-def GlobalUpdateTest(x):
-    
-    global population
-    population['creature_0']['Oscillator_period'] = x
-    
 
-
-#brain_test = GenomeCalculation('creature_0')
 

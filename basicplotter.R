@@ -1,5 +1,5 @@
-setwd('~/Documents/Symulator/Outputs')
-#setwd('C:/Users/Atlas/Desktop/Symulator/Outputs')
+#setwd('~/Documents/Symulator/Outputs')
+setwd('C:/Users/Atlas/Desktop/Symulator/Outputs')
 
 library('ggplot2')
 library('hash')
