@@ -7,8 +7,8 @@ Created on Mon Apr 10 16:54:25 2023
 """
 import os
 #os.chdir('/Users/kieran/Documents/Symulator/')
-#os.chdir('C:/Users/Atlas/Desktop/Symulator/')
-os.chdir('/Users/kieran/Documents/Symulator/')
+os.chdir('C:/Users/Atlas/Desktop/Symulator/')
+#os.chdir('/Users/kieran/Documents/Symulator/')
 
 
 import pandas as pd
@@ -925,8 +925,21 @@ def Gene_Checker(creature_ID):
     
     return(output_list)
 
-
-
+def stat_updater(df,gen):
+    
+    global stats
+    
+    entry = {'Survived':0,
+             'Died':0}
+    
+    for i in df.keys():
+        
+        entry[df[i]['status']] += 1
+    
+    stats[gen] = entry
+    
+    
+    
 def ready_checker(creature_ID):
     
     dictionary = {}
@@ -1226,7 +1239,8 @@ population, field = Populate(field,
                       parameters['GRID_SIZE'],
                       parameters['POPULATION'])
 
-
+# Just a place holder for the stats dictionary
+stats = {}
 
 def gen_sim(gen):
     
@@ -1267,6 +1281,9 @@ def gen_sim(gen):
                     
                     population[c]['Coordinates'] = new_coordinates
         
+        # This function selectively kills the creatures
+        Death()
+        
         if gen in parameters['SAVED_GENERATIONS']:
             filename_field = ('Outputs/Generation'+ str(gen) +'/'+ str(t) + '_field.csv')
             filename_pop = ('Outputs/Generation'+ str(gen) +'/'+ str(t) + '_populations.csv')
@@ -1283,6 +1300,7 @@ def Death():
     # Update the fate of all the creatures
     for c in population.keys():
         population[c]['status'] = Fate(c)
+    
 
 def Inheritance():
     
@@ -1333,13 +1351,14 @@ def Simulation():
         # This simulates one generation
         gen_sim(g)
         
-        # This function selectively kills the creatures
-        Death()
+        # Will update the stat dictionary
+        stat_updater(population,g)
         
         # Create the new generation
         Inheritance()
-        
-        
+    
+    getArray(stats).to_csv('Outputs/stat_summary.csv')
+    
 
 Simulation()
 
