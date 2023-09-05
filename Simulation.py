@@ -19,9 +19,13 @@ import shutil
 
 #import matplotlib.pyplot as plt
 
-# Survival
-# Inheritance
-# data output
+#### TODO notes ####
+
+# Complete the pheromone updater
+# Decide whether or not to even have a pheromone field
+#           -> Would save computation time if pheromone sense was what calulate the amount of pheropmone, not just reading the fields
+#           -> a pheromone field could be used in generation that are being saved
+# Add in the other pheromone senses (sense north, sense west, ...)
 
 
 #### Parameter declarations ####
@@ -65,8 +69,8 @@ parameters = FindParameters('parameters.txt')
 
 
 neurones = {
-    'input':['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN'],
-    'output':['MvN','MvE','MvS','MvW','MvR','SOsc'],
+    'input':['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN','SPhe'],
+    'output':['MvN','MvE','MvS','MvW','MvR','SOsc','OmPh'],
     }
 
 
@@ -111,6 +115,8 @@ def diagDist(coords1,coords2):
     elif y2 >= y1:
         y_dif = y2-y1
     
+    # Calculate the distance
+    # This is slow
     distance = math.sqrt((x_dif**2)+(y_dif**2))
     
     return(distance)
@@ -380,6 +386,21 @@ def LPo(creature_ID):
     local_density = (len(creature_list) / 48)
     
     return(local_density)
+
+
+def SPhe(creature_ID):
+    
+    # Isolate the coordinates of the creature
+    Coords = population[creature_ID]['Coordinates']
+    
+    # Isolate pheromone concentration at the creatures location
+    phe = pheromone_field[Coords[1]][Coords[0]]
+    
+    # Replace dot with value of zero
+    if phe == '.':
+        phe = 0
+        
+    return(phe)
 
 ## Calculate the distance from the borders
 # East
@@ -737,7 +758,29 @@ def MvR(creature_ID):
     return(random.choice(my_list)(creature_ID))
 
 def OmPh(creature_ID):
-    pass
+    
+    global pheromone_pop
+    
+    # Generate an ID for the burst of pheromones
+    # has to be uncapped and numeric
+    if pheromone_pop == {}:
+        burst_id = 0
+    else:
+        burst_id = (max(pheromone_pop.keys())+1)
+        
+    # Find the creatures coordinates
+    creature_coord = population[creature_ID]['Coordinates']
+    
+    entry = {}
+    # Generate the entry for the pheromone
+    entry['origin'] = creature_coord
+    entry['r'] = 1
+    entry['creature_ID'] = creature_ID
+    
+    pheromone_pop[burst_id] = entry
+    
+    return(creature_coord)
+
 
 
 def SOsc(cr_id,change):
@@ -750,12 +793,32 @@ def SOsc(cr_id,change):
 neurone_f = {
     'input_f':{'Age':Age,'Osc':Osc,'TPo':TPo,'LPo':LPo,'BdE':BdE,
                'BdW':BdW,'BdN':BdN,'BdS':BdS,'NbD':NbD,'BlE':BlE,
-               'BlW':BlW,'BlS':BlS,'BlN':BlN},
+               'BlW':BlW,'BlS':BlS,'BlN':BlN,'SPhe':SPhe},
     'output_f':{'MvN':MvN,'MvE':MvE,'MvS':MvS,'MvW':MvW,'MvR':MvR,
-                'SOsc':SOsc}
+                'SOsc':SOsc,'OmPh':OmPh}
     }
 
 
+
+#### These functions are needed to the general running of the simulation ####
+
+def pheromone_update():
+    
+    global pheromone_pop
+    global pheromone_field
+    
+    # Clear the field foir the next update
+    pheromone_field = FieldGen(parameters['GRID_SIZE'])
+    
+    # Loop through each creature that has been added to the p
+    for c in pheromone_pop.keys():
+        
+        
+        for y in pheromone_field.keys():
+            
+            for x in pheromone_field[y].keys():
+                
+                pass
 
 
 # This function creates the first randomly generated genome for 
@@ -1234,6 +1297,7 @@ field = FieldGen(parameters['GRID_SIZE'])
 
 # Generate identical field in the pheromone field
 pheromone_field = FieldGen(parameters['GRID_SIZE'])
+pheromone_pop = {}
 
 print("Populating world...")
 population, field = Populate(field, 
@@ -1253,6 +1317,12 @@ def gen_sim(gen):
         
         if t%20 == 0:
             print(t)
+            
+            
+        # Update the pheromone field
+        pheromone_update()
+        
+        
         for c in population.keys():
             
             # Increase the creature's age by 1
@@ -1363,19 +1433,19 @@ def Simulation():
 
 Simulation()
 
-def print_1000():
-    
-    for i in range(100000):
-        print(i)
+#def print_1000():
+#    
+#    for i in range(100000):
+#        print(i)
 
-def print_hello():
-    
-    for i in range(100000):
-        print("hello")
+#def print_hello():
+#    
+#    for i in range(100000):
+#        print("hello")
+#
+#print_1000()
 
-print_1000()
-
-t1 = Thread(target=print_1000)
-t2 = Thread(target=print_hello)
-t1.start()
-t2.start()
+#t1 = Thread(target=print_1000)
+#t2 = Thread(target=print_hello)
+#t1.start()
+#t2.start()
