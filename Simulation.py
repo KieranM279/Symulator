@@ -10,7 +10,7 @@ import os
 os.chdir('C:/Users/Atlas/Desktop/Symulator/')
 #os.chdir('/Users/kieran/Documents/Symulator/')
 
-
+import time
 import pandas as pd
 import random
 import math
@@ -26,7 +26,10 @@ import shutil
 #           -> Would save computation time if pheromone sense was what calulate the amount of pheropmone, not just reading the fields
 #           -> a pheromone field could be used in generation that are being saved
 # Add in the other pheromone senses (sense north, sense west, ...)
+#
+# Add in periodic updates to the stats summary file, every 100 generations or so
 
+start = time.time()
 
 #### Parameter declarations ####
 ## You can change these ##
@@ -807,19 +810,55 @@ def pheromone_update():
     global pheromone_pop
     global pheromone_field
     
-    # Clear the field foir the next update
+    # Clear the field for the next update
     pheromone_field = FieldGen(parameters['GRID_SIZE'])
     
     # Loop through each creature that has been added to the p
-    for c in pheromone_pop.keys():
+    for c in list(pheromone_pop.keys()):
         
+        # Isolate the current radius
+        r = pheromone_pop[c]['r']
+        # Isolate the central point
+        origin = pheromone_pop[c]['origin']
         
         for y in pheromone_field.keys():
             
             for x in pheromone_field[y].keys():
                 
-                pass
-
+                # Isolate the current field coordinates
+                field_x = x
+                field_y = y
+                
+                # Convert to numeric values
+                field_x = Coord2Num(x)
+                field_y = Coord2Num(y)
+                
+                # Calculate the distance between the origin and the current coordinate
+                dist = diagDist(origin, [field_x,field_y])
+                
+                if round(dist,0) == r:
+                    
+                    # Calculate the concentration to add to the cell
+                    add_conc = ((5-(r-1))*0.2)
+                    # Find the concentration that is already there
+                    current_conc = pheromone_field[y][x]
+                    
+                    if current_conc == '.':
+                        current_conc = 0
+                    
+                    # Calculate the new concentration
+                    conc = add_conc + current_conc
+                    # Concentration can't exceed 1
+                    if conc > 1:
+                        conc = 1
+                    
+                    pheromone_field[y][x] = conc
+                    
+        # Add one to the radius of the burst for next iteration
+        pheromone_pop[c]['r'] += 1
+        # Radius must not exceed 6
+        if pheromone_pop[c]['r'] == 6:
+            pheromone_pop.pop(c)
 
 # This function creates the first randomly generated genome for 
 def GenomeCreate(gene_num):
@@ -989,7 +1028,7 @@ def Gene_Checker(creature_ID):
     
     return(output_list)
 
-def stat_updater(df,gen):
+def stat_updater(df,pheromone_df,gen):
     
     global stats
     
@@ -999,6 +1038,15 @@ def stat_updater(df,gen):
     for i in df.keys():
         
         entry[df[i]['status']] += 1
+    
+    bursts = 0
+    for b in pheromone_df.keys():
+        
+        if pheromone_df['r'] == 1:
+            
+            bursts +=1
+    
+    entry['emisions'] = bursts
     
     stats[gen] = entry
     
@@ -1358,8 +1406,10 @@ def gen_sim(gen):
         if gen in parameters['SAVED_GENERATIONS']:
             filename_field = ('Outputs/Generation'+ str(gen) +'/'+ str(t) + '_field.csv')
             filename_pop = ('Outputs/Generation'+ str(gen) +'/'+ str(t) + '_populations.csv')
+            filename_pheromone = ('Outputs/Generation'+ str(gen) +'/'+ str(t) + '_pheromone.csv')
             getArray(field).to_csv(filename_field)
             getArray(population).to_csv(filename_pop)
+            getArray(pheromone_field).to_csv(filename_pheromone)
 
 
 
@@ -1423,10 +1473,13 @@ def Simulation():
         gen_sim(g)
         
         # Will update the stat dictionary
-        stat_updater(population,g)
+        stat_updater(population, pheromone_pop, g)
         
         # Create the new generation
         Inheritance()
+        
+        if g%100 == 0:
+            getArray(stats).to_csv('Outputs/stat_summary.csv')
     
     getArray(stats).to_csv('Outputs/stat_summary.csv')
     
@@ -1449,3 +1502,7 @@ Simulation()
 #t2 = Thread(target=print_hello)
 #t1.start()
 #t2.start()
+
+end = time.time()
+
+print("Time ellapsed:" + str(end-start) + ' seconds')
