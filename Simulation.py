@@ -1479,7 +1479,8 @@ def Simulation():
         Inheritance()
         
         if g%100 == 0:
-            getArray(stats).to_csv('Outputs/stat_summary.csv')
+            temp_filename = ('Outputs/gen'+g+'_stat_summary.csv')
+            getArray(stats).to_csv(temp_filename)
     
     getArray(stats).to_csv('Outputs/stat_summary.csv')
     
