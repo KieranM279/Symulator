@@ -22,12 +22,8 @@ import shutil
 #### TODO notes ####
 
 # Complete the pheromone updater
-# Decide whether or not to even have a pheromone field
-#           -> Would save computation time if pheromone sense was what calulate the amount of pheropmone, not just reading the fields
-#           -> a pheromone field could be used in generation that are being saved
-# Add in the other pheromone senses (sense north, sense west, ...)
-#
-# Add in periodic updates to the stats summary file, every 100 generations or so
+# Add in the pheromone field creation for saved simualtions generations only
+
 
 start = time.time()
 
@@ -72,7 +68,8 @@ parameters = FindParameters('parameters.txt')
 
 
 neurones = {
-    'input':['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN','SPhe'],
+    'input':['Age','Osc','TPo','LPo','BdE','BdW','BdN','BdS','NbD','BlE','BlW','BlS','BlN',
+             'SPhe','SPheN','SPheS','SPheE','SPheW'],
     'output':['MvN','MvE','MvS','MvW','MvR','SOsc','OmPh'],
     }
 
@@ -344,6 +341,8 @@ def Osc(creature_ID):
     
     return(y)
 
+# Calculate the number of creatures in the total population
+# Doesn't do anything until I allow the others to kill
 def TPo(creature_ID):
     
     # Current population
@@ -353,6 +352,7 @@ def TPo(creature_ID):
     
     return(output)
 
+# Calculates the number of creatures in the immediate vicinity
 def LPo(creature_ID):
     
     # Isolate the coordinates of the individual
@@ -390,20 +390,156 @@ def LPo(creature_ID):
     
     return(local_density)
 
-
+# Senses the pheromone density at the creatures current location
 def SPhe(creature_ID):
     
     # Isolate the coordinates of the creature
     Coords = population[creature_ID]['Coordinates']
+    # Convert coordinates to numeric values
+    x = Coord2Num(Coords[0])
+    y = Coord2Num(Coords[1])
+    coords = [x,y]
     
-    # Isolate pheromone concentration at the creatures location
-    phe = pheromone_field[Coords[1]][Coords[0]]
+    concentration_list = list()
     
-    # Replace dot with value of zero
-    if phe == '.':
-        phe = 0
+    # Loop through all the pheromone bursts
+    for b in pheromone_pop.keys():
         
+        # If the current cell is within a burst
+        if coords in pheromone_pop[b]['cells']:
+            
+            # Add its concentration to a growing list
+            concentration_list.append(pheromone_pop[b]['conc'])
+    
+    # Sum all the concentrations together
+    phe = sum(concentration_list)
+    
+    # Set max concentration to 1
+    if phe > 1:
+        phe = 1
+    
     return(phe)
+
+# Senses the pheromone density just north of the creature
+def SPheN(creature_ID):
+    
+    # Isolate the coordinates of the creature
+    Coords = population[creature_ID]['Coordinates']
+    # Convert coordinates to numeric values
+    x = Coord2Num(Coords[0])
+    y = (Coord2Num(Coords[1]) + 1)
+    coords = [x,y]
+    
+    concentration_list = list()
+    
+    # Loop through all the pheromone bursts
+    for b in pheromone_pop.keys():
+        
+        # If the current cell is within a burst
+        if coords in pheromone_pop[b]['cells']:
+            
+            # Add its concentration to a growing list
+            concentration_list.append(pheromone_pop[b]['conc'])
+    
+    # Sum all the concentrations together
+    phe = sum(concentration_list)
+    
+    # Set max concentration to 1
+    if phe > 1:
+        phe = 1
+    
+    return(phe)
+
+# Senses the pheromone density just south of the creature
+def SPheS(creature_ID):
+    
+    # Isolate the coordinates of the creature
+    Coords = population[creature_ID]['Coordinates']
+    # Convert coordinates to numeric values
+    x = Coord2Num(Coords[0])
+    y = (Coord2Num(Coords[1]) - 1)
+    coords = [x,y]
+    
+    concentration_list = list()
+    
+    # Loop through all the pheromone bursts
+    for b in pheromone_pop.keys():
+        
+        # If the current cell is within a burst
+        if coords in pheromone_pop[b]['cells']:
+            
+            # Add its concentration to a growing list
+            concentration_list.append(pheromone_pop[b]['conc'])
+    
+    # Sum all the concentrations together
+    phe = sum(concentration_list)
+    
+    # Set max concentration to 1
+    if phe > 1:
+        phe = 1
+    
+    return(phe)
+
+# Senses the pheromone density just east of the creature
+def SPheE(creature_ID):
+    
+    # Isolate the coordinates of the creature
+    Coords = population[creature_ID]['Coordinates']
+    # Convert coordinates to numeric values
+    x = (Coord2Num(Coords[0]) + 1)
+    y = Coord2Num(Coords[1])
+    coords = [x,y]
+    
+    concentration_list = list()
+    
+    # Loop through all the pheromone bursts
+    for b in pheromone_pop.keys():
+        
+        # If the current cell is within a burst
+        if coords in pheromone_pop[b]['cells']:
+            
+            # Add its concentration to a growing list
+            concentration_list.append(pheromone_pop[b]['conc'])
+    
+    # Sum all the concentrations together
+    phe = sum(concentration_list)
+    
+    # Set max concentration to 1
+    if phe > 1:
+        phe = 1
+    
+    return(phe)
+
+# Senses the pheromone density just west of the creature
+def SPheW(creature_ID):
+    
+    # Isolate the coordinates of the creature
+    Coords = population[creature_ID]['Coordinates']
+    # Convert coordinates to numeric values
+    x = (Coord2Num(Coords[0]) - 1)
+    y = Coord2Num(Coords[1])
+    coords = [x,y]
+    
+    concentration_list = list()
+    
+    # Loop through all the pheromone bursts
+    for b in pheromone_pop.keys():
+        
+        # If the current cell is within a burst
+        if coords in pheromone_pop[b]['cells']:
+            
+            # Add its concentration to a growing list
+            concentration_list.append(pheromone_pop[b]['conc'])
+    
+    # Sum all the concentrations together
+    phe = sum(concentration_list)
+    
+    # Set max concentration to 1
+    if phe > 1:
+        phe = 1
+    
+    return(phe)
+
 
 ## Calculate the distance from the borders
 # East
@@ -779,6 +915,8 @@ def OmPh(creature_ID):
     entry['origin'] = creature_coord
     entry['r'] = 1
     entry['creature_ID'] = creature_ID
+    entry['conc'] = 1
+    entry['cells'] = []
     
     pheromone_pop[burst_id] = entry
     
@@ -796,7 +934,8 @@ def SOsc(cr_id,change):
 neurone_f = {
     'input_f':{'Age':Age,'Osc':Osc,'TPo':TPo,'LPo':LPo,'BdE':BdE,
                'BdW':BdW,'BdN':BdN,'BdS':BdS,'NbD':NbD,'BlE':BlE,
-               'BlW':BlW,'BlS':BlS,'BlN':BlN,'SPhe':SPhe},
+               'BlW':BlW,'BlS':BlS,'BlN':BlN,'SPhe':SPhe,
+               'SPheN':SPheN,'SPheS':SPheS,'SPheE':SPheE,'SPheW':SPheW},
     'output_f':{'MvN':MvN,'MvE':MvE,'MvS':MvS,'MvW':MvW,'MvR':MvR,
                 'SOsc':SOsc,'OmPh':OmPh}
     }
@@ -805,60 +944,129 @@ neurone_f = {
 
 #### These functions are needed to the general running of the simulation ####
 
-def pheromone_update():
+# This calculates the cell for each pheromone radius
+def radiiCalc(origin,r):
     
-    global pheromone_pop
-    global pheromone_field
+    # Isolate the coordinates
+    x = origin[0]
+    y = origin[1]
+    # Convert the coordinate to a numeric value
+    x = Coord2Num(x)
+    y = Coord2Num(y)
     
-    # Clear the field for the next update
-    pheromone_field = FieldGen(parameters['GRID_SIZE'])
-    
-    # Loop through each creature that has been added to the p
-    for c in list(pheromone_pop.keys()):
+    # Calculate the 1st radius
+    if r == 1:
         
-        # Isolate the current radius
-        r = pheromone_pop[c]['r']
-        # Isolate the central point
-        origin = pheromone_pop[c]['origin']
+        entry = [[x+1,y+1],[x-1,y-1],[x+1,y],[x-1,y],
+                 [x-1,y+1],[x+1,y-1],[x,y+1],[x,y-1]]
         
-        for y in pheromone_field.keys():
+    # Calculate the 2nd radius
+    if r == 2:
+        
+        entry = [[x-1,y+2],[x,y+2],[x+1,y+2],[x-2,y+1],[x-2,y],[x-1,y-2],
+                 [x-2,y-1],[x,y-2],[x+1,y-2],[x+2,y+1],[x+2,y],[x+2,y-1]]
+        
+    # Calculate the 3rd radius
+    if r == 3:
+        
+         entry = [[x+3,y+1],[x+3,y-1],[x-3,y+1],[x-3,y-1],[x+3,y],[x-3,y],
+                  [x+1,y+3],[x-1,y+3],[x+1,y-3],[x-1,y-3],[x,y+3],[x,y-3],
+                  [x+2,y+2],[x+2,y-2],[x-2,y+2],[x-2,y-2]]
+         
+    # Calculate the 4th radius
+    if r == 4: 
+        
+        entry = [[x+4,y+2],[x+4,y+1],[x+4,y-1],[x+4,y-2],[x+4,y],
+                 [x-4,y+2],[x-4,y+1],[x-4,y-1],[x-4,y-2],[x-4,y],
+                 [x+2,y+4],[x+1,y+4],[x-1,y+4],[x-2,y+4],[x,y+4],
+                 [x+2,y-4],[x+1,y-4],[x-1,y-4],[x-2,y-4],[x,y-4],
+                 [x+3,y+3],[x+3,y-3],[x-3,y+3],[x-3,y-3],
+                 [x+2,y+3],[x+3,y+2],[x+2,y-3],[x+3,y-2],
+                 [x-2,y+3],[x-3,y+2],[x-3,y-2],[x-2,y-3]]
+        
+    # Calculate the 5th radius
+    if r == 5:
+        
+        entry = [[x+5,y+2],[x+5,y+1],[x+5,y-1],[x+5,y-2],[x+5,y],
+                 [x-5,y+2],[x-5,y+1],[x-5,y-1],[x-5,y-2],[x-5,y],
+                 [x+2,y+5],[x+1,y+5],[x-1,y+5],[x-2,y+5],[x,y+5],
+                 [x+2,y-5],[x+1,y-5],[x-1,y-5],[x-2,y-5],[x,y-5],
+                 [x+4,y+3],[x+3,y+4],[x-3,y-4],[x-4,y-3],
+                 [x+4,y-3],[x+3,y-4],[x-4,y+3],[x-3,y+4]]
+        
+    return(entry)
+
+# Calculates the pheromone concentration at the requested coordinate
+def modified_SPhe(Coords):
+    
+    # Isolate the coordinates of the creature
+    Coords = Coords
+    # Convert coordinates to numeric values
+    x = Coord2Num(Coords[0])
+    y = Coord2Num(Coords[1])
+    coords = [x,y]
+    
+    concentration_list = list()
+    
+    # Loop through all the pheromone bursts
+    for b in pheromone_pop.keys():
+        
+        # If the current cell is within a burst
+        if coords in pheromone_pop[b]['cells']:
             
-            for x in pheromone_field[y].keys():
-                
-                # Isolate the current field coordinates
-                field_x = x
-                field_y = y
-                
-                # Convert to numeric values
-                field_x = Coord2Num(x)
-                field_y = Coord2Num(y)
-                
-                # Calculate the distance between the origin and the current coordinate
-                dist = diagDist(origin, [field_x,field_y])
-                
-                if round(dist,0) == r:
-                    
-                    # Calculate the concentration to add to the cell
-                    add_conc = ((5-(r-1))*0.2)
-                    # Find the concentration that is already there
-                    current_conc = pheromone_field[y][x]
-                    
-                    if current_conc == '.':
-                        current_conc = 0
-                    
-                    # Calculate the new concentration
-                    conc = add_conc + current_conc
-                    # Concentration can't exceed 1
-                    if conc > 1:
-                        conc = 1
-                    
-                    pheromone_field[y][x] = conc
-                    
-        # Add one to the radius of the burst for next iteration
-        pheromone_pop[c]['r'] += 1
+            # Add its concentration to a growing list
+            concentration_list.append(pheromone_pop[b]['conc'])
+    
+    # Sum all the concentrations together
+    phe = sum(concentration_list)
+    
+    # Set max concentration to 1
+    if phe > 1:
+        phe = 1
+    
+    return(phe)
+
+
+def pheromone_update2(gen):
+    
+    # Import the global pheromone dictionary
+    global pheromone_pop
+    
+    # key = radius, value = concentration
+    conc_conv_dict = {1:1, 2:0.8, 3:0.6, 4:0.4, 5:0.2, 6:0}
+    # Loop through the bursts that have been added to the dictionary
+    for b in list(pheromone_pop.keys()):
+        
+        # Generate the grid cells that have a pheromone in them
+        pheromone_pop[b]['cells'] = radiiCalc(pheromone_pop[b]['origin'], 
+                                              pheromone_pop[b]['r'])
+         # Increase the redius by 1
+        pheromone_pop[b]['r'] += 1
+        
+         # Update the concentration
+        pheromone_pop[b]['conc'] = conc_conv_dict[pheromone_pop[b]['r']]
+        
         # Radius must not exceed 6
-        if pheromone_pop[c]['r'] == 6:
-            pheromone_pop.pop(c)
+        if pheromone_pop[b]['r'] == 6:
+            pheromone_pop.pop(b)
+    
+    # For the saved generations
+    if gen in parameters['SAVED_GENERATIONS']:
+        
+        # Import the global pheromone field
+        global pheromone_field
+        # Replace it almost immediately
+        pheromone_field = FieldGen(parameters['GRID_SIZE'])
+        
+        # Loop through the y coordinates of the pheromone field
+        for fy in pheromone_field.keys():
+            # Loop through the x coordinates of the pheromone field
+            for fx in pheromone_field[fy].keys():
+                
+                # Calculate the pheromone concentration for the current coordinates
+                pheromone_field[fy][fx] = modified_SPhe([fx,fy])
+                
+
 
 # This function creates the first randomly generated genome for 
 def GenomeCreate(gene_num):
@@ -1040,9 +1248,10 @@ def stat_updater(df,pheromone_df,gen):
         entry[df[i]['status']] += 1
     
     bursts = 0
+    
     for b in pheromone_df.keys():
         
-        if pheromone_df['r'] == 1:
+        if pheromone_df[b]['r'] == 1:
             
             bursts +=1
     
@@ -1368,7 +1577,7 @@ def gen_sim(gen):
             
             
         # Update the pheromone field
-        pheromone_update()
+        pheromone_update2(gen)
         
         
         for c in population.keys():
@@ -1479,7 +1688,7 @@ def Simulation():
         Inheritance()
         
         if g%100 == 0:
-            temp_filename = ('Outputs/gen'+g+'_stat_summary.csv')
+            temp_filename = ('Outputs/gen'+str(g)+'_stat_summary.csv')
             getArray(stats).to_csv(temp_filename)
     
     getArray(stats).to_csv('Outputs/stat_summary.csv')
