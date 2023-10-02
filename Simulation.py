@@ -21,10 +21,6 @@ import shutil
 
 #### TODO notes ####
 
-# Complete the pheromone updater
-# Add in the pheromone field creation for saved simualtions generations only
-
-
 start = time.time()
 
 #### Parameter declarations ####
@@ -994,6 +990,10 @@ def radiiCalc(origin,r):
                  [x+4,y+3],[x+3,y+4],[x-3,y-4],[x-4,y-3],
                  [x+4,y-3],[x+3,y-4],[x-4,y+3],[x-3,y+4]]
         
+    if r == 6:
+        
+        entry = []
+        
     return(entry)
 
 # Calculates the pheromone concentration at the requested coordinate
@@ -1037,17 +1037,19 @@ def pheromone_update2(gen):
     # Loop through the bursts that have been added to the dictionary
     for b in list(pheromone_pop.keys()):
         
+        
         # Generate the grid cells that have a pheromone in them
         pheromone_pop[b]['cells'] = radiiCalc(pheromone_pop[b]['origin'], 
                                               pheromone_pop[b]['r'])
-         # Increase the redius by 1
-        pheromone_pop[b]['r'] += 1
         
-         # Update the concentration
+        # Update the concentration
         pheromone_pop[b]['conc'] = conc_conv_dict[pheromone_pop[b]['r']]
         
+        # Increase the redius by 1
+        pheromone_pop[b]['r'] += 1
+        
         # Radius must not exceed 6
-        if pheromone_pop[b]['r'] == 6:
+        if pheromone_pop[b]['r'] == 7:
             pheromone_pop.pop(b)
     
     # For the saved generations
