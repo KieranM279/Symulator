@@ -1305,7 +1305,7 @@ def DecisionMaker(df):
             
             option_list = (['yes']*success_multiplier) + (['no']*failure_multiplier)
             
-            # Genreate the final choice
+            # Generate the final choice
             outcome = random.choice(option_list)
             
             if outcome == 'no':
@@ -1446,11 +1446,14 @@ def GenomeCalculation(creature_ID):
     
         choice_dict[a] = math.tanh(sum(action_in_list))
     
-    #print(choice_dict)
-    
     what_am_i_doing = DecisionMaker(choice_dict)
     
-    return(what_am_i_doing)
+    # Make it a dictionary for the OSc gene
+    what_am_i_dict = {}
+    for o in what_am_i_doing:
+        what_am_i_dict[o] = choice_dict[o]
+    
+    return(what_am_i_dict)
 
 def mutate(genome):
     
@@ -1588,7 +1591,9 @@ def gen_sim(gen):
             population[c]['Age'] += 1
             
             # Calculate what the creature is going to do
-            action_list = GenomeCalculation(c)
+            action_dict = GenomeCalculation(c)
+            
+            action_list = list(action_dict.keys())
             
             # If there are any actions to carry out
             if len(action_list) > 0:
@@ -1598,9 +1603,16 @@ def gen_sim(gen):
                     
                     old_coordinates = population[c]['Coordinates']
                     
+                    # Special rules for setting the Oscilator period
                     if a == 'SOsc':
-                       neurone_f['output_f'][a](c,1)
-                       continue
+                        
+                        if action_dict['SOsc'] < 0.5:
+                            delta = -1
+                        else:
+                            delta = 1
+                            
+                        neurone_f['output_f'][a](c,delta)
+                        continue
                    
                     # Call the actual action function
                     new_coordinates = neurone_f['output_f'][a](c)
