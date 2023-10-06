@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Apr 10 16:54:25 2023
@@ -332,6 +331,9 @@ def Age(creature_ID):
 def Osc(creature_ID):
     
     osc_period = population[creature_ID]['Oscillator_period']
+
+    if osc_period == 0:
+        osc_period = 1
     
     y = (math.sin(population[creature_ID]['Age']/osc_period) + 1)/2
     
