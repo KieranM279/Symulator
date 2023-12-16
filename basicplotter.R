@@ -131,6 +131,7 @@ basic_plotter <- function(filename,tick,gen) {
 }
 
 
+
 for (g in parameters[['SAVED_GENERATIONS']][[1]]) {
   
   gen_name <- paste("Generation",g,sep = "")
