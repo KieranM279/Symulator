@@ -1,5 +1,5 @@
 # Symulator
-
+In progress readme (Sorry)
 ## Usage
 
 ### Parameters
@@ -26,3 +26,47 @@ MUTATION_RATE 0.001
 | GENES | Sets the total number of connections that will form the creatures brain. | Number |
 | INTERNAL_NEURONS | Sets the total number of nodes that separate the sensory neurons and the action neurons | Number |
 | MUTATION_RATE | Sets the likelihood that the current base in the geome with flip to an alternate state, when you traverse the genome base by base, (0 -> 1, 1 -> 0) | Number |
+
+
+
+
+
+
+## Outputs
+The script Simulation.py generates two folders 'Outputs/' and 'frames/'. The 'frames folder is the location where the R script BasicPlotter.R puts the individual frames of the GIFs. This is left untouched by the main python script. The 'Outputs/' folder is were the all the creature coordinate data and  genome information is kept.
+
+1. Outputs/
+   - Generation0/
+        - field.csv
+        - population.csv
+        - pheromone.csv
+   - Generation1/
+   - Generation5/
+   - GenerationX/ (etc.)
+2. frames/
+3. stat_summary.csv
+
+
+
+## Genomes
+Example genome, comprised of 32 genes, for a randomly generated creature in the simulation
+```
+['6AE1F13F', 'C9872A8C', 'F7C6201F', '51C24B12', '897C608D', 'CC134376', '57FDB56E', '7A3FA17F', 
+'C8CEBD8C', '740A15E4', '5B3493EB', '47F8C348', '6624B2BD', '3FC9D790', 'EAF48512', '6F408442', 
+'41A9E722', '747162BF', '4C7F253C', 'C98EE201', 'AFD684E6', 'C1673026', '762902F3', '657D13AF']
+```
+
+The genome is a list of genes up to the size specficied in 'parameters.txt'. Each gene is encoded as a 8 digit hexadecimal. This can be converted to a 32 bit binary integer. Within each genes is the information required to determine a single connection between two nodes in a creatures brain. Below is a table to show hoe that informations is stored, using the first gene, '6AE1F13F', in the genome above as an example.
+
+```
+6AE1F13F = 01101010111000011111000100111111 = 32 bits
+```
+
+| Bit range | Example | Identity | Explanation |
+| -- | -- | -- | -- |
+| Gene[0] | 0 | Input neuron type | 0 = Sensory neuron, 1 = Internal neuron |
+| Gene[1:8] | 1101010 | Input neuron identity |  |
+| Gene[8] | 1 | Output neuron identity |  |
+| Gene[9:16] | 1100001 | Output neuron identity |  |
+| Gene[16:32] | 1111000100111111 | Connection weight |  |
+
