@@ -1,6 +1,6 @@
 # Symulator
 In progress readme (Sorry)
-<<<<<<< HEAD
+
 
 ## Example generated gifs
 ### Generation 0
@@ -8,7 +8,7 @@ In progress readme (Sorry)
 ### Generation 50
 ![](https://github.com/Symulator/gifs/gen50_animated.gif)
 =======
->>>>>>> dab3945264d1f3e57b7d2d7f3d5010041b99d4e5
+
 ## Usage
 
 Three scripts to run the simulation
@@ -63,18 +63,12 @@ The script Simulation.py generates two folders 'Outputs/' and 'frames/'. The 'fr
 
 
 ## Genomes
-<<<<<<< HEAD
+
 Example genome, comprised of 6 genes, for a randomly generated creature in the simulation
 ```
 ['6AE1F13F', 'C9872A8C', 'F7C6201F', '51C24B12', '897C608D', 'CC134376']
-=======
-Example genome, comprised of 32 genes, for a randomly generated creature in the simulation
 ```
-['6AE1F13F', 'C9872A8C', 'F7C6201F', '51C24B12', '897C608D', 'CC134376', '57FDB56E', '7A3FA17F', 
-'C8CEBD8C', '740A15E4', '5B3493EB', '47F8C348', '6624B2BD', '3FC9D790', 'EAF48512', '6F408442', 
-'41A9E722', '747162BF', '4C7F253C', 'C98EE201', 'AFD684E6', 'C1673026', '762902F3', '657D13AF']
->>>>>>> dab3945264d1f3e57b7d2d7f3d5010041b99d4e5
-```
+
 
 The genome is a list of genes up to the size specficied in 'parameters.txt'. Each gene is encoded as a 8 digit hexadecimal. This can be converted to a 32 bit binary integer. Within each genes is the information required to determine a single connection between two nodes in a creatures brain. Below is a table to show hoe that informations is stored, using the first gene, '6AE1F13F', in the genome above as an example.
 
@@ -90,8 +84,3 @@ The genome is a list of genes up to the size specficied in 'parameters.txt'. Eac
 | Gene[9:16] | 1100001 | Output neuron identity |  |
 | Gene[16:32] | 1111000100111111 | Connection weight |  |
 
-<<<<<<< HEAD
-
-## 
-=======
->>>>>>> dab3945264d1f3e57b7d2d7f3d5010041b99d4e5
