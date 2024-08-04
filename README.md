@@ -4,9 +4,9 @@ In progress readme (Sorry)
 
 ## Example generated gifs
 ### Generation 0
-![](https://github.com/Symulator/gifs/gen0_animated.gif)
+![Generation 0](https://github.com/Symulator/gifs/gen0_animated.gif)
 ### Generation 50
-![](https://github.com/Symulator/gifs/gen50_animated.gif)
+![Generation 50](https://github.com/Symulator/gifs/gen50_animated.gif)
 =======
 
 ## Usage
