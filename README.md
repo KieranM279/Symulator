@@ -7,7 +7,7 @@ In progress readme (Sorry)
 ![Generation 0](https://github.com/Symulator/gifs/gen0_animated.gif)
 ### Generation 50
 ![Generation 50](https://github.com/Symulator/gifs/gen50_animated.gif)
-=======
+
 
 ## Usage
 
