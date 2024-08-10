@@ -8,7 +8,7 @@ In progress readme (Sorry)
 This shows the first generation that was simulated. Their genomes have been randomly generated and as a result they have random and non-productive behaviour. At the end of this, and every generation simulated, all creatures in the left half of the grid by the final tick were killed. The genomes of the following generation are built on the random coupling, of the survivors, and recombination of their two sets of genes.
 ### Generation 50
 ![Generation 50](gifs/gen50_animated.gif)
-After 50 generations the creatures all now migrate to the rigt of the grid. These creatures don't "know" that they need to do this, but their genomes are built from the generations that came before them (i.e. those that survived by travelling right and then passing on their genes to the following generation)
+After 50 generations the creatures all now migrate to the right of the grid. These creatures don't "know" that they need to do this, but their genomes are built from the generations that came before them (i.e. those that survived by travelling right and then passing on their genes to the following generation)
 
 
 ## Usage
