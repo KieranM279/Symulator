@@ -4,15 +4,19 @@ In progress readme (Sorry)
 
 ## Example generated gifs
 ### Generation 0
+This shows the first generation that was simulated. Their genomes have been randomly generated and as a result they have random and non-productive behaviour. At the end of this, and every generation simulated, all creatures in the left half of the grid by the final tick were killed. The genomes of the following generation are built on the random coupling, of the survivors, and recombination of their two sets of genes.
 ![Generation 0](gifs/gen0_animated.gif)
 ### Generation 50
+After 50 generations the creatures all now migrate to the rigt of the grid. These creatures don't "know" that they need to do this, but their genomes are built from the generations that came before them (i.e. those that survived by travelling right and then passing on their genes to the following generation)
 ![Generation 50](gifs/gen50_animated.gif)
 
 
 ## Usage
 
-Three scripts to run the simulation
+Three scripts to run the simulation:
 
+1. Simulation.py
+2. BasicPlotter.R
 
 
 
