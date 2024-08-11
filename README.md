@@ -20,12 +20,12 @@ Three scripts to run the simulation:
    - Generates a population of creatures with randomly generated genomes.
    - Simulates how each creature behaves for the generation.
    - Determine which creatures survived the generation
-   - Randomly couple the survivors and randomly recombine their selected genomes to generate a new population.
+   - Randomly couple the survivors and recombine their genomes to generate a new population.
    - Simulate the new population of creatures.
 
 2. basicplotter.R
    - Reads in the 'parameters.txt' file to create the text for the legend of each frame.
-   - Sequetially reads in the coordinate data of the creatures and plots their location on the grid, frame by frame.
+   - Sequentially reads in the coordinate data of the creatures and plots their location on the grid, frame by frame.
 3. makeGIFS.sh
    - Really just not the most useful bash script. It merely runs a series of other bash scripts which use the 'convert' tool to turn each frame, produced by the 'basicplotter.R' script, into a gif.
 
