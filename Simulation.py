@@ -5,9 +5,8 @@ Created on Mon Apr 10 16:54:25 2023
 @author: kieran
 """
 import os
-#os.chdir('/Users/kieran/Documents/Symulator/')
-os.chdir('C:/Users/Atlas/Desktop/Symulator/')
-#os.chdir('/Users/kieran/Documents/Symulator/')
+os.chdir(os.getcwd())
+
 
 import time
 import pandas as pd
