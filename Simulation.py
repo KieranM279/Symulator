@@ -12,6 +12,7 @@ import time
 import pandas as pd
 import random
 import math
+import sys
 import shutil
 #from threading import Thread
 
@@ -67,7 +68,45 @@ neurones = {
     'output':['MvN','MvE','MvS','MvW','MvR','SOsc','OmPh'],
     }
 
+def makeBar(x,segments):
 
+    # Declare strings
+    done = "="
+    notdone = "-"
+    bar = ""
+
+    # Loop through all segments
+    for i in range(segments):
+        
+        # Generate the progress bar
+        if(i < (x*segments)):
+            bar = (bar + done)
+        else:
+            bar = (bar + notdone)
+    
+    # Calculate the percentage
+    perc = (x*100)
+    perc = str(round(perc,0))
+    perc = (perc+"%")
+
+    # Generate and print the report
+    bar = ("|"+bar+"|"+perc+"|")
+    print('\r' + bar, end='')
+    sys.stdout.flush()
+
+
+def progressReport(i,maxI,segNum = 10):
+
+    # Calculate the levels
+    percX = maxI/segNum
+    percX = math.floor(percX)
+
+    # If the level is reached
+    if (i % percX) == 0:
+
+        perc = (i/maxI)
+        perc = round(perc,2)
+        makeBar(x=perc,segments = segNum)
 
 # Generates the required directories for the output
 def DirMaker():
@@ -1574,14 +1613,13 @@ def gen_sim(gen):
     
     global population
     global field
-    print("=================================================================")
-    print("Simulating generation: " +str(gen))
+    #print("\n=================================================================")
+    print("\nSimulating generation: " +str(gen+1)+" of " + str(parameters['GENERATIONS']))
     for t in range(parameters['TICKS']):
         
-        if t%20 == 0:
-            print(t)
-            
-            
+        # Special function to print progress report
+        progressReport(i = (t+1),maxI = parameters['TICKS'],segNum = 50)
+        
         # Update the pheromone field
         pheromone_update2(gen)
         
@@ -1730,4 +1768,4 @@ Simulation()
 
 end = time.time()
 
-print("Time ellapsed:" + str(end-start) + ' seconds')
+print("\nTime ellapsed:" + str(end-start) + ' seconds')
